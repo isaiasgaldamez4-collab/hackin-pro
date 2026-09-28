@@ -1,0 +1,2740 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-[#020205] text-slate-100">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MATRIX-CORE: Simulador de Hackeo Ético y Terminal de Ciberinteligencia</title>
+  <meta name="description" content="Simulador de hackeo ético de vanguardia y terminal de ciberinteligencia con minijuegos de descifrado, integración a Google Sheets y reportes forenses en PDF." />
+  <meta property="og:title" content="MATRIX-CORE: Simulador de Hackeo Ético y Terminal de Ciberinteligencia" />
+  <meta property="og:description" content="Simulador de hackeo ético de vanguardia y terminal de ciberinteligencia con minijuegos de descifrado, integración a Google Sheets y reportes forenses en PDF." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            matrix: {
+              black: '#020205',
+              dark: '#070b12',
+              card: 'rgba(8, 14, 26, 0.85)',
+              border: '#00f5d4',
+              green: '#00ff66',
+              cyan: '#00f5d4',
+              alert: '#ff0055'
+            }
+          },
+          fontFamily: {
+            mono: ['"JetBrains Mono"', '"Share Tech Mono"', 'monospace', 'Consolas', 'Courier New']
+          },
+          animation: {
+            'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'shake': 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both',
+            'scanline': 'scanline 8s linear infinite',
+            'glow': 'glow 2s ease-in-out infinite alternate'
+          },
+          keyframes: {
+            shake: {
+              '10%, 90%': { transform: 'translate3d(-2px, 0, 0)' },
+              '20%, 80%': { transform: 'translate3d(4px, 0, 0)' },
+              '30%, 50%, 70%': { transform: 'translate3d(-6px, 0, 0)' },
+              '40%, 60%': { transform: 'translate3d(6px, 0, 0)' }
+            },
+            scanline: {
+              '0%': { transform: 'translateY(-100%)' },
+              '100%': { transform: 'translateY(1000%)' }
+            },
+            glow: {
+              'from': { filter: 'drop-shadow(0 0 4px #00ff66)' },
+              'to': { filter: 'drop-shadow(0 0 16px #00f5d4)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- FontAwesome 6 Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- html2pdf.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <!-- Google Fonts: JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'JetBrains Mono', 'Share Tech Mono', monospace;
+      background-color: #020205;
+      color: #e2e8f0;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* Custom Cyber Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #040810;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #00f5d4;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00ff66;
+    }
+
+    /* Glow utilities */
+    .glow-green {
+      text-shadow: 0 0 8px rgba(0, 255, 102, 0.7), 0 0 20px rgba(0, 255, 102, 0.3);
+    }
+    .glow-cyan {
+      text-shadow: 0 0 8px rgba(0, 245, 212, 0.7), 0 0 20px rgba(0, 245, 212, 0.3);
+    }
+    .glow-red {
+      text-shadow: 0 0 10px rgba(255, 0, 85, 0.8), 0 0 24px rgba(255, 0, 85, 0.4);
+    }
+
+    .box-glow-green {
+      box-shadow: 0 0 15px rgba(0, 255, 102, 0.25), inset 0 0 15px rgba(0, 255, 102, 0.08);
+    }
+    .box-glow-cyan {
+      box-shadow: 0 0 20px rgba(0, 245, 212, 0.2), inset 0 0 15px rgba(0, 245, 212, 0.05);
+    }
+    .box-glow-red {
+      box-shadow: 0 0 25px rgba(255, 0, 85, 0.4), inset 0 0 20px rgba(255, 0, 85, 0.15);
+    }
+
+    /* Glassmorphism */
+    .glass-panel {
+      background: rgba(8, 14, 26, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 245, 212, 0.22);
+    }
+    .glass-panel:hover {
+      border-color: rgba(0, 245, 212, 0.45);
+    }
+
+    /* CRT scanlines effect */
+    .crt-overlay {
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      background-size: 100% 3px, 3px 100%;
+      pointer-events: none;
+    }
+
+    /* Highway Animation: skull moving left to right continuously */
+    @keyframes skullHighway {
+      0% {
+        left: -32px;
+      }
+      100% {
+        left: calc(100% + 32px);
+      }
+    }
+    .highway-skull {
+      animation: skullHighway 3s linear infinite;
+    }
+
+    /* Stamp for PDF Report */
+    .top-secret-stamp {
+      border: 4px solid #dc2626;
+      color: #dc2626;
+      text-transform: uppercase;
+      font-weight: 900;
+      letter-spacing: 0.2em;
+      padding: 0.5rem 1.5rem;
+      display: inline-block;
+      transform: rotate(-10deg);
+      mask-image: radial-gradient(circle at center, black 60%, transparent 95%);
+    }
+  </style>
+</head>
+
+<body class="h-full w-full bg-[#020205] text-slate-200 overflow-x-hidden relative selection:bg-[#00ff66] selection:text-black">
+  <!-- Matrix Canvas Background -->
+  <canvas id="matrix-canvas" class="fixed inset-0 w-full h-full z-0 opacity-25 pointer-events-none"></canvas>
+
+  <!-- CRT subtle scanline overlay -->
+  <div class="fixed inset-0 w-full h-full z-10 crt-overlay pointer-events-none"></div>
+
+  <!-- Red Strobe Flash Screen for Intrusion Alert -->
+  <div id="intrusion-overlay" class="fixed inset-0 z-50 bg-red-950/90 hidden flex-col items-center justify-center p-6 text-center backdrop-blur-md border-8 border-red-600 animate-shake">
+    <div class="max-w-2xl bg-black/90 p-8 rounded-xl border-2 border-red-500 box-glow-red space-y-6">
+      <div class="text-6xl text-red-500 animate-bounce">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h2 class="text-3xl sm:text-4xl font-black text-red-500 glow-red tracking-wider">
+        ⚠️ ALERTA: INTENTO DE INTRUSIÓN DETECTADO. IP RASTREADA.
+      </h2>
+      <div class="p-4 bg-red-950/40 rounded border border-red-800/80 text-left font-mono text-xs sm:text-sm text-red-300 space-y-1">
+        <p><span class="text-red-400 font-bold">[!] SISTEMA DE DEFENSA:</span> HoneyPot Activo - Alerta Nivel 5</p>
+        <p><span class="text-red-400 font-bold">[!] GEOLOCALIZACIÓN:</span> Sector Rastreado - Nodo Reenviado a Interpol Cibernética</p>
+        <p><span class="text-red-400 font-bold">[!] DIRECCIÓN IP CAPTURADA:</span> <span id="intruder-ip" class="text-yellow-300 font-mono">185.220.101.5</span></p>
+        <p><span class="text-red-400 font-bold">[!] REGISTRO FORENSE:</span> Evento firmado y archivado en registro de violaciones.</p>
+      </div>
+      <button onclick="dismissIntrusionAlert()" class="px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded tracking-wider transition-all transform hover:scale-105">
+        <i class="fa-solid fa-rotate-left mr-2"></i> REINICIAR CONEXIÓN SEGURA
+      </button>
+    </div>
+  </div>
+
+  <!-- APP CONTAINER -->
+  <div id="app" class="relative z-20 min-h-screen flex flex-col justify-between">
+
+    <!-- ========================================== -->
+    <!-- 1. PANEL DE ACCESO (TERMINAL BOOT) VIEW     -->
+    <!-- ========================================== -->
+    <div id="view-boot" class="min-h-screen flex items-center justify-center p-4 sm:p-6">
+      <div class="w-full max-w-xl glass-panel rounded-xl box-glow-cyan p-6 sm:p-8 space-y-6 relative overflow-hidden">
+        <!-- Top bar of window -->
+        <div class="flex items-center justify-between border-b border-[#00f5d4]/20 pb-3">
+          <div class="flex items-center space-x-2">
+            <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+            <span class="w-3 h-3 rounded-full bg-[#00ff66] inline-block animate-pulse"></span>
+            <span class="ml-2 text-xs text-[#00f5d4] tracking-widest uppercase font-semibold">KERNEL v5.18-SEC // MATRIX-BOOT</span>
+          </div>
+          <div class="flex items-center space-x-3 text-xs text-slate-400">
+            <button onclick="toggleAudio()" id="audio-toggle-boot" class="hover:text-[#00ff66] transition-colors" title="Alternar Sonido">
+              <i class="fa-solid fa-volume-high text-xs"></i> SFX: <span id="audio-status-boot">ON</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Terminal Title -->
+        <div class="text-center space-y-2">
+          <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#00f5d4]/10 border border-[#00f5d4]/40 text-[#00ff66] text-3xl mb-1 box-glow-green">
+            <i class="fa-solid fa-terminal"></i>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-[#00f5d4] glow-cyan tracking-wider">
+            MATRIX-CORE
+          </h1>
+          <p class="text-xs text-slate-400 uppercase tracking-widest">
+            Simulador de Hackeo Ético & Terminal de Ciberinteligencia
+          </p>
+        </div>
+
+        <!-- Boot Log Simulation -->
+        <div class="bg-black/70 p-3 rounded border border-slate-800 font-mono text-[11px] leading-relaxed text-slate-400 h-24 overflow-y-auto space-y-0.5">
+          <p class="text-[#00ff66]">> [BIOS] Quantum CPU Hash Verified... OK</p>
+          <p class="text-[#00f5d4]">> [INIT] Encriptando túnel de nodo Tor... 2048-bit Handshake OK</p>
+          <p class="text-slate-300">> [AUTH] Verificando servidor de hojas de cálculo Google Sheets API...</p>
+          <p id="boot-status-line" class="text-yellow-400 animate-pulse">> Esperando credenciales de autorización de nivel hacker...</p>
+        </div>
+
+        <!-- Access Form -->
+        <form id="boot-login-form" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs uppercase tracking-wider text-[#00f5d4] font-semibold mb-1">
+              <i class="fa-solid fa-user-secret mr-1.5"></i> Alias de Hacker
+            </label>
+            <div class="relative">
+              <input
+                type="text"
+                id="login-alias"
+                required
+                autocomplete="off"
+                placeholder="ej: neo, zero_cool, cipher"
+                value="neo"
+                class="w-full bg-black/80 border border-[#00f5d4]/40 rounded px-3.5 py-2.5 text-sm text-[#00ff66] placeholder-slate-600 focus:outline-none focus:border-[#00ff66] focus:ring-1 focus:ring-[#00ff66] transition-all font-mono"
+              />
+              <span class="absolute right-3 top-2.5 text-slate-500 text-xs">@darknet</span>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs uppercase tracking-wider text-[#00f5d4] font-semibold mb-1">
+              <i class="fa-solid fa-key mr-1.5"></i> Llave de Criptocifrado
+            </label>
+            <div class="relative">
+              <input
+                type="password"
+                id="login-pass"
+                required
+                autocomplete="current-password"
+                placeholder="Introduce tu clave secreta"
+                value="matrix2026"
+                class="w-full bg-black/80 border border-[#00f5d4]/40 rounded px-3.5 py-2.5 text-sm text-[#00ff66] placeholder-slate-600 focus:outline-none focus:border-[#00ff66] focus:ring-1 focus:ring-[#00ff66] transition-all font-mono"
+              />
+              <button
+                type="button"
+                onclick="togglePasswordVisibility('login-pass', this)"
+                class="absolute right-3 top-2.5 text-slate-400 hover:text-[#00f5d4] text-xs"
+              >
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Credential helper shortcut chips -->
+          <div class="pt-1 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400">
+            <span>Accesos rápidos válidos:</span>
+            <div class="flex gap-2">
+              <button type="button" onclick="fillCredentials('neo', 'matrix2026')" class="text-[#00f5d4] hover:underline hover:text-[#00ff66]">
+                neo / matrix2026
+              </button>
+              <span>·</span>
+              <button type="button" onclick="fillCredentials('zero_cool', 'hacktheplanet')" class="text-[#00f5d4] hover:underline hover:text-[#00ff66]">
+                zero_cool
+              </button>
+              <span>·</span>
+              <button type="button" onclick="fillCredentials('root', 'toor')" class="text-[#00f5d4] hover:underline hover:text-[#00ff66]">
+                root / toor
+              </button>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            id="boot-btn"
+            class="w-full mt-2 py-3 px-4 bg-gradient-to-r from-[#00ff66]/20 via-[#00f5d4]/30 to-[#00ff66]/20 hover:from-[#00ff66]/40 hover:to-[#00f5d4]/40 text-[#00ff66] border border-[#00ff66]/60 rounded font-bold uppercase tracking-widest transition-all duration-200 box-glow-green flex items-center justify-center space-x-2"
+          >
+            <i class="fa-solid fa-unlock-keyhole"></i>
+            <span>AUTORIZAR ACCESO AL SISTEMA</span>
+          </button>
+        </form>
+
+        <!-- Footer / API Info -->
+        <div class="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-500">
+          <span class="flex items-center space-x-1.5">
+            <span id="api-status-dot" class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span id="api-status-text">Google Sheets API: Configurada / Lista</span>
+          </span>
+          <button onclick="openApiConfigModal()" class="text-[#00f5d4] hover:text-white underline">
+            Configurar API URL
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 2. CONSOLA DE ATAQUES (CYBER-LAB CENTRAL)  -->
+    <!-- ========================================== -->
+    <div id="view-lab" class="hidden min-h-screen flex-col">
+      <!-- Top Navigation & System Status Bar -->
+      <header class="w-full glass-panel border-b border-[#00f5d4]/30 px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3 sticky top-0 z-30">
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded bg-[#00ff66]/10 border border-[#00ff66]/40 flex items-center justify-center text-[#00ff66] box-glow-green text-sm">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div>
+            <h2 class="text-sm sm:text-base font-bold text-[#00f5d4] glow-cyan tracking-wider flex items-center gap-2">
+              MATRIX-CORE <span class="text-[10px] text-[#00ff66] px-1.5 py-0.2 border border-[#00ff66]/40 rounded">CYBER-LAB v4.2</span>
+            </h2>
+            <p class="text-[10px] text-slate-400 font-mono">
+              TERMINAL DE PENETRACIÓN ÉTICA & CIBERINTELIGENCIA
+            </p>
+          </div>
+        </div>
+
+        <!-- Telemetry center stats -->
+        <div class="hidden lg:flex items-center space-x-6 text-xs font-mono">
+          <div>
+            <span class="text-slate-500 uppercase text-[10px] block">OPERADOR AUTORIZADO</span>
+            <span id="header-operator" class="text-[#00ff66] font-bold">neo@matrix</span>
+          </div>
+          <div>
+            <span class="text-slate-500 uppercase text-[10px] block">ESTADO DE SESIÓN</span>
+            <span class="text-[#00f5d4] flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-[#00ff66] animate-pulse"></span> CONEXIÓN ROOT ACTIVA
+            </span>
+          </div>
+          <div>
+            <span class="text-slate-500 uppercase text-[10px] block">MISIÓN EN HOJAS</span>
+            <span id="header-sheets-status" class="text-emerald-400">Tab 'Compras' Sincronizada</span>
+          </div>
+          <div>
+            <span class="text-slate-500 uppercase text-[10px] block">TIEMPO TRANSCURRIDO</span>
+            <span id="session-clock" class="text-yellow-400 tabular-nums">00:00:00</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center space-x-2 sm:space-x-3 text-xs">
+          <button onclick="toggleAudio()" class="px-2.5 py-1.5 glass-panel rounded text-slate-300 hover:text-[#00ff66] transition-colors" title="Silenciar / Activar Audio">
+            <i class="fa-solid fa-volume-high mr-1"></i> <span id="audio-status-nav">SFX ON</span>
+          </button>
+          <button onclick="openApiConfigModal()" class="px-2.5 py-1.5 glass-panel rounded text-[#00f5d4] hover:text-white transition-colors" title="Configurar Google Sheets API URL">
+            <i class="fa-solid fa-cloud-arrow-up mr-1"></i> API Sheets
+          </button>
+          <button onclick="handleLogout()" class="px-3 py-1.5 bg-red-950/60 hover:bg-red-800 text-red-300 border border-red-500/40 rounded transition-colors font-semibold" title="Cerrar Sesión Segura">
+            <i class="fa-solid fa-power-off mr-1"></i> Desconectar
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Cyber-Lab Body -->
+      <main class="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- LEFT COLUMN: Targets, Cyber-Arsenal Tools & Active Hack Cockpit (8 cols on lg) -->
+        <div class="lg:col-span-8 space-y-5">
+
+          <!-- CYBER-ARSENAL TOOL SELECTOR TABS -->
+          <div class="glass-panel rounded-xl p-2 flex flex-wrap gap-2 text-xs font-mono border border-[#00f5d4]/30 box-glow-cyan">
+            <button
+              id="tab-btn-servers"
+              onclick="switchArsenalTab('servers')"
+              class="flex-1 min-w-[130px] py-2 px-3 rounded-lg bg-[#00f5d4]/20 border border-[#00f5d4] text-[#00f5d4] font-bold flex items-center justify-center gap-1.5 transition-all"
+            >
+              <i class="fa-solid fa-server"></i> SERVIDORES & PENTÁGONO
+            </button>
+            <button
+              id="tab-btn-osint"
+              onclick="switchArsenalTab('osint')"
+              class="flex-1 min-w-[130px] py-2 px-3 rounded-lg bg-black/60 border border-slate-700 text-slate-400 hover:text-white font-bold flex items-center justify-center gap-1.5 transition-all"
+            >
+              <i class="fa-solid fa-user-secret"></i> OSINT & DOXX SOCIAL
+            </button>
+            <button
+              id="tab-btn-backdoors"
+              onclick="switchArsenalTab('backdoors')"
+              class="flex-1 min-w-[130px] py-2 px-3 rounded-lg bg-black/60 border border-slate-700 text-slate-400 hover:text-white font-bold flex items-center justify-center gap-1.5 transition-all"
+            >
+              <i class="fa-solid fa-door-open"></i> PUERTAS TRASERAS (SHELL)
+            </button>
+            <button
+              id="tab-btn-cracker"
+              onclick="switchArsenalTab('cracker')"
+              class="flex-1 min-w-[130px] py-2 px-3 rounded-lg bg-black/60 border border-slate-700 text-slate-400 hover:text-white font-bold flex items-center justify-center gap-1.5 transition-all"
+            >
+              <i class="fa-solid fa-unlock"></i> HASHCAT CRACKER
+            </button>
+          </div>
+
+          <!-- TAB 1 CONTENT: SERVERS SECTION (With PENTAGON) -->
+          <div id="arsenal-panel-servers" class="space-y-5">
+            <!-- Target Selection Section -->
+            <div class="glass-panel rounded-xl p-4 sm:p-5 box-glow-cyan">
+              <div class="flex items-center justify-between mb-4 border-b border-[#00f5d4]/20 pb-3">
+                <div class="flex items-center space-x-2">
+                  <i class="fa-solid fa-crosshairs text-[#00ff66] text-lg"></i>
+                  <h3 class="text-sm sm:text-base font-bold text-white tracking-wide">
+                    SERVIDORES OBJETIVOS & NODO DEFCON PENTÁGONO
+                  </h3>
+                </div>
+                <span class="text-xs text-slate-400 font-mono">Selecciona un objetivo para iniciar</span>
+              </div>
+
+              <!-- 4 Server Cards Grid -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+
+                <!-- Target 1: Banco Central -->
+                <div
+                  id="target-card-banco"
+                  onclick="selectTarget('banco')"
+                  class="target-card cursor-pointer p-3.5 rounded-lg bg-black/60 border border-[#00f5d4]/30 hover:border-[#00ff66] hover:bg-[#00ff66]/5 transition-all duration-200 relative group"
+                >
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="w-7 h-7 rounded bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-[#00ff66] text-xs">
+                      <i class="fa-solid fa-building-columns"></i>
+                    </span>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-700/60">
+                      DIF: ALTA
+                    </span>
+                  </div>
+                  <h4 class="font-bold text-xs text-white group-hover:text-[#00ff66] transition-colors truncate">
+                    BANCO CENTRAL
+                  </h4>
+                  <p class="text-[10px] text-slate-400 mt-0.5 truncate">
+                    SWIFT & Bóveda Offshore
+                  </p>
+                  <div class="mt-2 pt-2 border-t border-slate-800 text-[10px] font-mono text-slate-400 space-y-0.5">
+                    <p>IP: <span class="text-[#00f5d4]">198.51.100.44</span></p>
+                    <p>Firewall: <span class="text-yellow-400">3 Capas</span></p>
+                  </div>
+                </div>
+
+                <!-- Target 2: Red Satelital -->
+                <div
+                  id="target-card-satelite"
+                  onclick="selectTarget('satelite')"
+                  class="target-card cursor-pointer p-3.5 rounded-lg bg-black/60 border border-[#00f5d4]/30 hover:border-[#00ff66] hover:bg-[#00ff66]/5 transition-all duration-200 relative group"
+                >
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="w-7 h-7 rounded bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-[#00f5d4] text-xs">
+                      <i class="fa-solid fa-satellite"></i>
+                    </span>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-400 border border-cyan-700/60">
+                      DIF: EXTREMA
+                    </span>
+                  </div>
+                  <h4 class="font-bold text-xs text-white group-hover:text-[#00f5d4] transition-colors truncate">
+                    RED SATELITAL
+                  </h4>
+                  <p class="text-[10px] text-slate-400 mt-0.5 truncate">
+                    Aegis-7 SatCom Orbit
+                  </p>
+                  <div class="mt-2 pt-2 border-t border-slate-800 text-[10px] font-mono text-slate-400 space-y-0.5">
+                    <p>IP: <span class="text-[#00f5d4]">203.0.113.88</span></p>
+                    <p>Firewall: <span class="text-yellow-400">4 Capas</span></p>
+                  </div>
+                </div>
+
+                <!-- Target 3: Servidor Gubernamental -->
+                <div
+                  id="target-card-gobierno"
+                  onclick="selectTarget('gobierno')"
+                  class="target-card cursor-pointer p-3.5 rounded-lg bg-black/60 border border-[#00f5d4]/30 hover:border-[#00ff66] hover:bg-[#00ff66]/5 transition-all duration-200 relative group"
+                >
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="w-7 h-7 rounded bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 text-xs">
+                      <i class="fa-solid fa-landmark-flag"></i>
+                    </span>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-red-950/80 text-red-400 border border-red-700/60">
+                      DIF: CRÍTICA
+                    </span>
+                  </div>
+                  <h4 class="font-bold text-xs text-white group-hover:text-red-400 transition-colors truncate">
+                    GOBIERNO SECTOR 4
+                  </h4>
+                  <p class="text-[10px] text-slate-400 mt-0.5 truncate">
+                    Ministerio Ciberdefensa
+                  </p>
+                  <div class="mt-2 pt-2 border-t border-slate-800 text-[10px] font-mono text-slate-400 space-y-0.5">
+                    <p>IP: <span class="text-[#00f5d4]">10.244.18.9</span></p>
+                    <p>Firewall: <span class="text-yellow-400">4 Capas</span></p>
+                  </div>
+                </div>
+
+                <!-- Target 4: PENTÁGONO (DoD Strategic Command) -->
+                <div
+                  id="target-card-pentagono"
+                  onclick="selectTarget('pentagono')"
+                  class="target-card cursor-pointer p-3.5 rounded-lg bg-black/60 border border-[#ff0055]/40 hover:border-[#ff0055] hover:bg-[#ff0055]/10 transition-all duration-200 relative group"
+                >
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="w-7 h-7 rounded bg-red-600/20 border border-red-500/50 flex items-center justify-center text-[#ff0055] text-xs">
+                      <i class="fa-solid fa-shield-halved"></i>
+                    </span>
+                    <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-red-950 text-red-400 border border-red-600 animate-pulse">
+                      DEFCON 1
+                    </span>
+                  </div>
+                  <h4 class="font-bold text-xs text-white group-hover:text-[#ff0055] transition-colors truncate">
+                    EL PENTÁGONO (DoD)
+                  </h4>
+                  <p class="text-[10px] text-slate-400 mt-0.5 truncate">
+                    SIPRNet & Protocolo Black
+                  </p>
+                  <div class="mt-2 pt-2 border-t border-slate-800 text-[10px] font-mono text-slate-400 space-y-0.5">
+                    <p>IP: <span class="text-[#ff0055]">198.51.100.254</span></p>
+                    <p>Firewall: <span class="text-red-400">5 Capas Militares</span></p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          <!-- Active Attack Cockpit & Minigame Arena -->
+          <div id="attack-cockpit" class="glass-panel rounded-xl p-5 box-glow-green space-y-5">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[#00f5d4]/20 pb-3">
+              <div>
+                <span class="text-[10px] uppercase tracking-wider text-slate-400 font-mono">MISIÓN EN EJECUCIÓN</span>
+                <h3 id="current-target-title" class="text-lg font-bold text-[#00ff66] glow-green flex items-center gap-2">
+                  <i id="current-target-icon" class="fa-solid fa-landmark-flag"></i>
+                  <span id="current-target-name">MINISTERIO DE CIBERDEFENSA (SECTOR 4)</span>
+                </h3>
+              </div>
+              <div class="flex items-center space-x-3 text-xs font-mono">
+                <span class="text-slate-400">DEFENSA VULNERADA:</span>
+                <span id="firewall-progress-text" class="text-[#00f5d4] font-bold">0 / 3 CAPAS</span>
+              </div>
+            </div>
+
+            <!-- Target Defense Progress Bar -->
+            <div class="space-y-1.5">
+              <div class="flex justify-between text-xs font-mono">
+                <span class="text-slate-400">Progreso de Infiltración Root:</span>
+                <span id="breach-percent" class="text-[#00ff66] font-bold">0%</span>
+              </div>
+              <div class="w-full h-3.5 bg-black/80 rounded-full border border-slate-700 overflow-hidden relative p-0.5">
+                <div
+                  id="breach-bar"
+                  class="h-full bg-gradient-to-r from-[#00f5d4] to-[#00ff66] rounded-full transition-all duration-300 box-glow-green"
+                  style="width: 0%;"
+                ></div>
+              </div>
+            </div>
+
+            <!-- MINIGAME 1: FREQUENCY TIMING LOCK -->
+            <div id="minigame-timing" class="bg-black/80 p-4 rounded-lg border border-[#00f5d4]/40 space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-wave-square text-[#00f5d4]"></i>
+                    MÓDULO DE BYPASS: Sincronizador de Frecuencia Cuántica
+                  </h4>
+                  <p class="text-xs text-slate-400">
+                    Presiona el botón <span class="text-[#00ff66] font-bold">[BLOQUEAR FRECUENCIA]</span> o la tecla <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-200">ESPACIO</kbd> cuando el rayo láser esté dentro de la zona verde.
+                  </p>
+                </div>
+                <div class="text-right font-mono">
+                  <span class="text-[10px] text-slate-500 block">BLOQUEOS REQUERIDOS</span>
+                  <span id="timing-locks-count" class="text-lg font-bold text-[#00ff66]">0 / 3</span>
+                </div>
+              </div>
+
+              <!-- Oscillation Track -->
+              <div class="relative w-full h-12 bg-[#040810] rounded border border-slate-800 overflow-hidden flex items-center">
+                <!-- Target Sweet Spot Zone -->
+                <div id="timing-sweet-spot" class="absolute h-full bg-[#00ff66]/20 border-x-2 border-[#00ff66] flex items-center justify-center text-[10px] text-[#00ff66] font-bold tracking-widest" style="left: 40%; width: 20%;">
+                  ZONA HACK
+                </div>
+                <!-- Moving Laser Cursor -->
+                <div id="timing-cursor" class="absolute w-2 h-full bg-cyan-300 box-glow-cyan shadow-[0_0_15px_#00f5d4]" style="left: 0%;"></div>
+              </div>
+
+              <div class="flex items-center justify-between gap-4">
+                <div id="timing-feedback" class="text-xs font-mono text-slate-400">
+                  Esperando activación de pulso...
+                </div>
+                <button
+                  type="button"
+                  id="timing-trigger-btn"
+                  onclick="triggerTimingLock()"
+                  class="px-6 py-2.5 bg-[#00f5d4]/20 hover:bg-[#00f5d4]/40 text-[#00f5d4] border border-[#00f5d4] rounded font-bold uppercase tracking-wider transition-all transform active:scale-95 box-glow-cyan flex items-center gap-2"
+                >
+                  <i class="fa-solid fa-bullseye"></i>
+                  <span>BLOQUEAR FRECUENCIA</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- MINIGAME 2: BINARY CIPHER HASH MATRIZ (Optional challenge or toggle) -->
+            <div id="minigame-binary" class="hidden bg-black/80 p-4 rounded-lg border border-yellow-500/40 space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-binary text-yellow-400"></i>
+                    DESCIFRADOR DE HASH BINARIO EN TIEMPO REAL
+                  </h4>
+                  <p class="text-xs text-slate-400">
+                    Alinea los bits para igualar el patrón de paridad antes de que el temporizador expire.
+                  </p>
+                </div>
+                <div class="text-right font-mono">
+                  <span class="text-[10px] text-slate-500 block">TIEMPO LÍMITE</span>
+                  <span id="binary-timer" class="text-xl font-bold text-yellow-400 tabular-nums">15.0s</span>
+                </div>
+              </div>
+
+              <!-- Binary Bit Selector -->
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+                  <span>HASH OBJETIVO: <span id="binary-target-code" class="text-[#00ff66] font-bold tracking-widest">1 0 1 1 0 1</span></span>
+                  <span>REGISTRO ACTUAL: <span id="binary-current-code" class="text-[#00f5d4] font-bold tracking-widest">0 0 0 0 0 0</span></span>
+                </div>
+
+                <div id="binary-buttons-grid" class="grid grid-cols-6 gap-2">
+                  <!-- Generated via JS -->
+                </div>
+              </div>
+
+              <div class="flex justify-between items-center text-xs font-mono">
+                <span id="binary-feedback" class="text-slate-400">Haz clic en los bits para conmutar su estado</span>
+                <button onclick="verifyBinaryCipher()" class="px-4 py-2 bg-yellow-500/20 text-yellow-300 border border-yellow-500 rounded font-bold hover:bg-yellow-500/40 transition-colors">
+                  INYECTAR HASH
+                </button>
+              </div>
+            </div>
+
+            <!-- Quick Sub-actions -->
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs pt-2 border-t border-slate-800 text-slate-400">
+              <div class="flex items-center space-x-2">
+                <button onclick="switchMinigame('timing')" id="btn-mode-timing" class="px-2 py-1 rounded bg-[#00f5d4]/20 text-[#00f5d4] border border-[#00f5d4]/40 font-mono">
+                  Modo: Sincronización Láser
+                </button>
+                <button onclick="switchMinigame('binary')" id="btn-mode-binary" class="px-2 py-1 rounded bg-black/60 text-slate-400 border border-slate-700 hover:text-white font-mono">
+                  Modo: Hash Binario
+                </button>
+              </div>
+              <button onclick="instantAutoExploit()" class="text-xs text-amber-400 hover:text-amber-300 underline font-mono">
+                [Dev Override: Forzar Explotación Inmediata]
+              </button>
+            </div>
+
+          </div>
+          </div>
+          <!-- END TAB 1 (SERVERS) -->
+
+          <!-- TAB 2: OSINT & DOXX SOCIAL RECON PANEL -->
+          <div id="arsenal-panel-osint" class="hidden space-y-5">
+            <div class="glass-panel rounded-xl p-5 box-glow-cyan space-y-4">
+              <div class="flex items-center justify-between border-b border-[#00f5d4]/20 pb-3">
+                <div class="flex items-center space-x-2">
+                  <i class="fa-solid fa-user-secret text-[#00ff66] text-lg"></i>
+                  <h3 class="text-sm sm:text-base font-bold text-white tracking-wide">
+                    MÓDULO DE CIBERINTELIGENCIA OSINT & RASTREO SOCIAL
+                  </h3>
+                </div>
+                <span class="text-[10px] text-yellow-400 font-mono border border-yellow-500/40 px-2 py-0.5 rounded bg-yellow-950/40">
+                  RECONOCIMIENTO PASIVO
+                </span>
+              </div>
+
+              <!-- Input bar -->
+              <div class="space-y-2">
+                <label class="block text-xs uppercase text-slate-300 font-mono">
+                  Identificador / Alias de la Persona a Rastrear:
+                </label>
+                <div class="flex gap-2">
+                  <div class="relative flex-1">
+                    <span class="absolute left-3 top-2.5 text-slate-500 text-xs">@</span>
+                    <input
+                      type="text"
+                      id="osint-target-input"
+                      value="phantom_operative"
+                      placeholder="ej: phantom_operative, victim_user, target_ceo"
+                      class="w-full bg-black/80 border border-[#00f5d4]/40 rounded pl-7 pr-3 py-2 text-xs font-mono text-[#00ff66] focus:outline-none focus:border-[#00ff66]"
+                    />
+                  </div>
+                  <button
+                    onclick="executeOsintSearch()"
+                    id="btn-osint-run"
+                    class="px-5 py-2 bg-[#00ff66]/20 hover:bg-[#00ff66]/40 text-[#00ff66] border border-[#00ff66] rounded text-xs font-bold font-mono transition-all box-glow-green"
+                  >
+                    <i class="fa-solid fa-satellite-dish mr-1"></i> RASTREAR HUELLA
+                  </button>
+                </div>
+                <div class="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
+                  <span>Objetivos de prueba:</span>
+                  <button onclick="setOsintTarget('phantom_operative')" class="text-[#00f5d4] hover:underline">@phantom_operative</button> ·
+                  <button onclick="setOsintTarget('ciber_director')" class="text-[#00f5d4] hover:underline">@ciber_director</button> ·
+                  <button onclick="setOsintTarget('hacker_shadow')" class="text-[#00f5d4] hover:underline">@hacker_shadow</button>
+                </div>
+              </div>
+
+              <!-- Scanning status bar -->
+              <div id="osint-scan-loader" class="hidden p-3 bg-black/80 rounded border border-slate-700 text-xs font-mono text-slate-300 space-y-2">
+                <div class="flex justify-between items-center text-[#00f5d4]">
+                  <span id="osint-scan-msg"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Consultando APIs de redes sociales y bases de datos filtradas...</span>
+                  <span id="osint-scan-pct" class="text-yellow-400 font-bold">25%</span>
+                </div>
+                <div class="w-full h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                  <div id="osint-scan-bar" class="h-full bg-gradient-to-r from-cyan-400 to-emerald-400" style="width: 25%"></div>
+                </div>
+              </div>
+
+              <!-- OSINT Dossier Card Result -->
+              <div id="osint-results-card" class="hidden bg-black/90 p-4 rounded-lg border border-[#00ff66]/40 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-full bg-slate-800 border-2 border-[#00ff66] flex items-center justify-center text-xl text-[#00ff66] box-glow-green">
+                      <i class="fa-solid fa-user-astronaut"></i>
+                    </div>
+                    <div>
+                      <h4 id="osint-profile-name" class="text-sm font-bold text-white font-mono flex items-center gap-2">
+                        @phantom_operative
+                        <span class="text-[9px] px-1.5 py-0.5 rounded bg-red-950 text-red-400 border border-red-700 font-bold">ALTO RIESGO</span>
+                      </h4>
+                      <p id="osint-profile-title" class="text-[11px] text-slate-400 font-mono">
+                        Ingeniero de Sistemas Senior // Infraestructura Crítica
+                      </p>
+                    </div>
+                  </div>
+                  <button onclick="logDossierToTerminal()" class="px-3 py-1 bg-[#00f5d4]/10 hover:bg-[#00f5d4]/30 text-[#00f5d4] border border-[#00f5d4]/50 rounded text-xs font-mono">
+                    <i class="fa-solid fa-terminal mr-1"></i> Volcar a CLI
+                  </button>
+                </div>
+
+                <!-- Grid Data Points -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-mono">
+                  <div class="p-2.5 bg-[#03060c] rounded border border-slate-800">
+                    <span class="text-slate-500 text-[10px] block uppercase">CORREO FILTRADO</span>
+                    <span id="osint-email" class="text-yellow-400 font-bold">p***_op@proton.me</span>
+                    <span class="text-[10px] text-red-400 block mt-0.5">Detectado en Brechas 2024</span>
+                  </div>
+                  <div class="p-2.5 bg-[#03060c] rounded border border-slate-800">
+                    <span class="text-slate-500 text-[10px] block uppercase">TELÉFONO VINCULADO</span>
+                    <span id="osint-phone" class="text-white font-bold">+1 (202) ***-7749</span>
+                    <span class="text-[10px] text-slate-500 block mt-0.5">Operador: T-Mobile US</span>
+                  </div>
+                  <div class="p-2.5 bg-[#03060c] rounded border border-slate-800">
+                    <span class="text-slate-500 text-[10px] block uppercase">IP ESTIMADA / GEO</span>
+                    <span id="osint-ip" class="text-[#00f5d4] font-bold">198.51.100.12 (Virginia)</span>
+                    <span class="text-[10px] text-slate-500 block mt-0.5">ISP: AWS East Region</span>
+                  </div>
+                </div>
+
+                <!-- Social Accounts Footprint -->
+                <div class="space-y-1.5 font-mono text-xs">
+                  <span class="text-slate-400 uppercase text-[10px] font-bold">Cuentas de Redes Sociales Identificadas:</span>
+                  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
+                    <div class="p-2 rounded bg-black border border-slate-800 flex items-center justify-between">
+                      <span class="text-slate-300"><i class="fa-brands fa-x-twitter text-cyan-400 mr-1.5"></i> X (Twitter)</span>
+                      <span class="text-emerald-400 font-bold">PÚBLICA</span>
+                    </div>
+                    <div class="p-2 rounded bg-black border border-slate-800 flex items-center justify-between">
+                      <span class="text-slate-300"><i class="fa-brands fa-github text-white mr-1.5"></i> GitHub</span>
+                      <span class="text-yellow-400 font-bold">REPOS EXP.</span>
+                    </div>
+                    <div class="p-2 rounded bg-black border border-slate-800 flex items-center justify-between">
+                      <span class="text-slate-300"><i class="fa-brands fa-telegram text-sky-400 mr-1.5"></i> Telegram</span>
+                      <span class="text-[#00ff66] font-bold">EN LÍNEA</span>
+                    </div>
+                    <div class="p-2 rounded bg-black border border-slate-800 flex items-center justify-between">
+                      <span class="text-slate-300"><i class="fa-brands fa-linkedin text-blue-400 mr-1.5"></i> LinkedIn</span>
+                      <span class="text-slate-400">CORP VINC.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Compromised Passwords & Breach Logs -->
+                <div class="p-3 bg-red-950/30 rounded border border-red-800/60 font-mono text-xs text-slate-300 space-y-1">
+                  <span class="text-red-400 font-bold block uppercase text-[11px]">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> Fuga de Credenciales Históricas (Data Breach):
+                  </span>
+                  <p><span class="text-slate-400">Hash SHA-1 Filtrado:</span> <span class="text-yellow-300 font-mono">7c4a8d09ca3762af61e59520943dc26494f8941b</span></p>
+                  <p><span class="text-slate-400">Contraseña en Texto Claro:</span> <span class="text-[#00ff66] font-bold">DeltaProtocol2025!</span></p>
+                  <p class="text-[10px] text-slate-500 italic mt-1">
+                    * Vector de penetración disponible: Credential Stuffing & Ingeniería Social.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 3: PUERTAS TRASERAS & REVERSE SHELL PANEL -->
+          <div id="arsenal-panel-backdoors" class="hidden space-y-5">
+            <div class="glass-panel rounded-xl p-5 box-glow-cyan space-y-4">
+              <div class="flex items-center justify-between border-b border-[#00f5d4]/20 pb-3">
+                <div class="flex items-center space-x-2">
+                  <i class="fa-solid fa-door-open text-yellow-400 text-lg"></i>
+                  <h3 class="text-sm sm:text-base font-bold text-white tracking-wide">
+                    ADMINISTRADOR DE PUERTAS TRASERAS & REVERSE SHELL ROOT
+                  </h3>
+                </div>
+                <span class="text-[10px] text-emerald-400 font-mono border border-emerald-500/40 px-2 py-0.5 rounded bg-emerald-950/40">
+                  LISTENER: 0.0.0.0:4444 [ACTIVO]
+                </span>
+              </div>
+
+              <!-- Backdoor Action Controls -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
+                <button
+                  onclick="triggerBackdoorScan()"
+                  class="p-3 bg-black/80 hover:bg-[#00f5d4]/10 border border-[#00f5d4]/40 hover:border-[#00f5d4] rounded-lg text-left transition-all group"
+                >
+                  <div class="flex items-center justify-between text-[#00f5d4] mb-1">
+                    <span class="font-bold">1. Escanear Puertos Ocultos</span>
+                    <i class="fa-solid fa-radar text-xs group-hover:rotate-45 transition-transform"></i>
+                  </div>
+                  <p class="text-[11px] text-slate-400">Busca demonios en puertos no estándar (4444, 1337, 31337).</p>
+                </button>
+
+                <button
+                  onclick="injectBackdoorPersistence()"
+                  class="p-3 bg-black/80 hover:bg-yellow-500/10 border border-yellow-500/40 hover:border-yellow-500 rounded-lg text-left transition-all group"
+                >
+                  <div class="flex items-center justify-between text-yellow-400 mb-1">
+                    <span class="font-bold">2. Inyectar Persistencia</span>
+                    <i class="fa-solid fa-syringe text-xs group-hover:scale-110 transition-transform"></i>
+                  </div>
+                  <p class="text-[11px] text-slate-400">Instala cron job oculto en /etc/cron.d/matrix_agent.</p>
+                </button>
+
+                <button
+                  onclick="connectReverseShell()"
+                  class="p-3 bg-black/80 hover:bg-[#00ff66]/10 border border-[#00ff66]/40 hover:border-[#00ff66] rounded-lg text-left transition-all group"
+                >
+                  <div class="flex items-center justify-between text-[#00ff66] mb-1">
+                    <span class="font-bold">3. Abrir Reverse Shell</span>
+                    <i class="fa-solid fa-terminal text-xs group-hover:translate-x-1 transition-transform"></i>
+                  </div>
+                  <p class="text-[11px] text-slate-400">Sesión interactiva UID=0 (root) en el servidor activo.</p>
+                </button>
+              </div>
+
+              <!-- Interactive Shell Terminal Screen -->
+              <div class="p-3 bg-black/95 rounded-lg border border-slate-800 font-mono text-xs space-y-2">
+                <div class="flex justify-between items-center text-slate-400 border-b border-slate-800 pb-1.5 text-[11px]">
+                  <span>CONSOLA DE SESIÓN REVERSE SHELL // TTY INTERACTIVA</span>
+                  <span id="shell-status" class="text-yellow-400">STANDBY - ESPERANDO INYECCIÓN</span>
+                </div>
+                <div id="shell-output" class="h-40 overflow-y-auto text-[11px] text-slate-300 space-y-0.5 select-text">
+                  <p class="text-slate-500">> Presiona "Abrir Reverse Shell" o "Inyectar Persistencia" para conectar con el servidor.</p>
+                </div>
+                <form onsubmit="handleShellExec(event)" class="flex gap-2 pt-1 border-t border-slate-800">
+                  <span class="text-red-400 font-bold">root@target:~#</span>
+                  <input
+                    type="text"
+                    id="shell-cmd-input"
+                    placeholder="sysinfo, hashdump, cat /etc/shadow, id, ps..."
+                    class="flex-1 bg-transparent text-[#00ff66] focus:outline-none text-xs font-mono"
+                  />
+                  <button type="submit" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-white rounded">
+                    ENVIAR
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: HASHCAT BRUTE-FORCE CRACKER -->
+          <div id="arsenal-panel-cracker" class="hidden space-y-5">
+            <div class="glass-panel rounded-xl p-5 box-glow-cyan space-y-4">
+              <div class="flex items-center justify-between border-b border-[#00f5d4]/20 pb-3">
+                <div class="flex items-center space-x-2">
+                  <i class="fa-solid fa-unlock text-[#00ff66] text-lg"></i>
+                  <h3 class="text-sm sm:text-base font-bold text-white tracking-wide">
+                    HASHCAT GPU CRACKER // FUERZA BRUTA & DICCIONARIO ROCKYOU
+                  </h3>
+                </div>
+                <span class="text-[10px] text-cyan-400 font-mono border border-cyan-500/40 px-2 py-0.5 rounded bg-cyan-950/40">
+                  ALGORITMO: SHA-256 / BCRYPT
+                </span>
+              </div>
+
+              <!-- Cracker control inputs -->
+              <div class="space-y-3 font-mono text-xs">
+                <div>
+                  <label class="block text-slate-400 text-[11px] uppercase mb-1">Hash Criptográfico a Romper:</label>
+                  <div class="flex gap-2">
+                    <input
+                      type="text"
+                      id="hashcat-input"
+                      value="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+                      class="flex-1 bg-black/80 border border-slate-700 rounded px-3 py-2 text-xs font-mono text-yellow-300 focus:outline-none focus:border-[#00ff66]"
+                    />
+                    <button
+                      onclick="startHashcatCracker()"
+                      id="btn-hashcat-start"
+                      class="px-5 py-2 bg-[#00ff66]/20 hover:bg-[#00ff66]/40 text-[#00ff66] border border-[#00ff66] rounded font-bold transition-all box-glow-green"
+                    >
+                      <i class="fa-solid fa-bolt mr-1"></i> DESENCRIPTAR
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Preset Hash Buttons -->
+                <div class="flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
+                  <span>Hashes de prueba:</span>
+                  <button onclick="setCrackHash('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', 'admin2026!')" class="text-[#00f5d4] hover:underline">SHA-256 (Admin)</button> ·
+                  <button onclick="setCrackHash('5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8', 'password123')" class="text-[#00f5d4] hover:underline">SHA-256 (User)</button> ·
+                  <button onclick="setCrackHash('4813494d137e1631bba301d5acab6e7bb7aa74ce1185d456565ef51d737677b2', 'matrix_root_omega')" class="text-[#00f5d4] hover:underline">SHA-256 (Pentágono)</button>
+                </div>
+              </div>
+
+              <!-- High speed Brute-force Display Monitor -->
+              <div class="bg-black/90 p-4 rounded-lg border border-slate-800 font-mono text-xs space-y-3">
+                <div class="flex justify-between items-center text-slate-400 text-[11px]">
+                  <span>VELOCIDAD DE PROCESAMIENTO: <span id="hashcat-speed" class="text-[#00ff66] font-bold">0 H/s</span></span>
+                  <span>PALABRAS PROBADAS: <span id="hashcat-words-count" class="text-yellow-400 font-bold">0</span></span>
+                  <span>ESTADO: <span id="hashcat-status-badge" class="text-slate-400">EN ESPERA</span></span>
+                </div>
+
+                <!-- Ticker Candidate -->
+                <div class="p-3 bg-[#03060c] rounded border border-slate-800 flex items-center justify-between">
+                  <span class="text-slate-500 text-[11px]">CANDIDATO ACTUAL:</span>
+                  <span id="hashcat-candidate" class="text-yellow-300 font-bold tracking-widest text-sm">---------</span>
+                </div>
+
+                <!-- Result Box -->
+                <div id="hashcat-result-box" class="hidden p-3 bg-emerald-950/40 rounded border border-emerald-500/60 flex items-center justify-between text-xs">
+                  <div>
+                    <span class="text-emerald-400 font-bold block">¡CONTRASEÑA DESCIFRADA CON ÉXITO!</span>
+                    <span class="text-slate-300">Texto en claro: <strong id="hashcat-plain-result" class="text-white text-sm ml-1 font-mono">admin2026!</strong></span>
+                  </div>
+                  <button onclick="copyHashResult()" class="px-3 py-1 bg-emerald-500 text-black font-bold rounded hover:bg-emerald-400 text-xs">
+                    Copiar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- END ARSENAL TABS -->
+
+          <!-- Mission History / Sheets Sync Audit Trail -->
+          <div class="glass-panel rounded-xl p-4 box-glow-cyan space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                <i class="fa-solid fa-table-list text-[#00ff66]"></i>
+                REGISTRO DE MISIONES VULNERADAS (PESTAÑA 'COMPRAS')
+              </h4>
+              <span id="mission-count-badge" class="text-[11px] font-mono text-emerald-400">0 Registradas</span>
+            </div>
+            <div id="missions-table-container" class="max-h-36 overflow-y-auto font-mono text-xs">
+              <table class="w-full text-left">
+                <thead class="text-[10px] text-slate-500 uppercase border-b border-slate-800">
+                  <tr>
+                    <th class="py-1">ID HACK</th>
+                    <th class="py-1">OPERADOR</th>
+                    <th class="py-1">OBJETIVO</th>
+                    <th class="py-1">DATOS EXTRAÍDOS</th>
+                    <th class="py-1 text-right">HORA</th>
+                  </tr>
+                </thead>
+                <tbody id="missions-table-body" class="divide-y divide-slate-800/60 text-slate-300">
+                  <tr class="text-slate-500 italic text-[11px]">
+                    <td colspan="5" class="py-3 text-center">No hay misiones ejecutadas aún. Vulnera un servidor para sincronizar en Google Sheets.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: Real Streaming Exploit Console (4 cols on lg) -->
+        <div class="lg:col-span-4 flex flex-col space-y-4">
+
+          <!-- Terminal Window -->
+          <div class="glass-panel rounded-xl flex-1 flex flex-col overflow-hidden box-glow-cyan min-h-[500px]">
+            <!-- Terminal Header -->
+            <div class="px-4 py-2.5 bg-black/80 border-b border-[#00f5d4]/20 flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500/80"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-[#00ff66]/80"></span>
+                <span class="text-xs font-mono font-bold text-[#00f5d4] ml-2">ROOT@EXPLOIT-CLI:~$</span>
+              </div>
+              <div class="flex items-center space-x-2 text-[11px]">
+                <button onclick="clearTerminal()" class="text-slate-400 hover:text-white" title="Limpiar Terminal">
+                  <i class="fa-solid fa-broom"></i>
+                </button>
+                <button onclick="toggleTerminalAutoScroll()" id="btn-autoscroll" class="text-[#00ff66]" title="Auto-scroll activado">
+                  <i class="fa-solid fa-angles-down"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Terminal Output Logs -->
+            <div id="terminal-screen" class="flex-1 p-3 bg-black/90 font-mono text-[11px] leading-relaxed text-slate-300 overflow-y-auto space-y-1 select-text">
+              <div class="text-[#00ff66] font-bold">
+                [+] MATRIX-CORE CIBER-CONSOLA INICIALIZADA EN MODO INTERACTIVO.
+              </div>
+              <div class="text-slate-400">
+                Escribe <span class="text-yellow-300 font-bold">'help'</span> para consultar comandos disponibles o interactúa con el cockpit.
+              </div>
+              <div class="text-slate-500">--------------------------------------------------</div>
+            </div>
+
+            <!-- Terminal Command Input Bar -->
+            <form id="terminal-input-form" onsubmit="handleCommandSubmit(event)" class="p-2.5 bg-[#03060c] border-t border-[#00f5d4]/20 flex items-center space-x-2">
+              <span class="text-[#00ff66] font-mono text-xs font-bold">>_</span>
+              <input
+                type="text"
+                id="cmd-input"
+                placeholder="Escribe 'help', 'scan', 'exploit' o 'clear'..."
+                autocomplete="off"
+                class="flex-1 bg-transparent text-xs font-mono text-[#00f5d4] placeholder-slate-600 focus:outline-none"
+              />
+              <button type="submit" class="text-xs text-[#00ff66] hover:text-white px-2 py-1 bg-[#00ff66]/10 rounded border border-[#00ff66]/30">
+                EJECUTAR
+              </button>
+            </form>
+          </div>
+
+          <!-- Quick System Diagnostic Gadget -->
+          <div class="glass-panel rounded-xl p-4 box-glow-cyan font-mono text-xs space-y-2">
+            <div class="flex justify-between items-center text-slate-400 border-b border-slate-800 pb-1.5">
+              <span>ESTADO DE ENCRIPTACIÓN:</span>
+              <span class="text-[#00ff66] font-bold">CHA-CHA20 // SEGURO</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-400 border-b border-slate-800 pb-1.5">
+              <span>LATENCIA DE TÚNEL:</span>
+              <span id="stat-latency" class="text-[#00f5d4] font-bold">14 ms (Tor Relay)</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-400">
+              <span>MODO SHEETS API:</span>
+              <span id="stat-api-mode" class="text-yellow-400 font-bold">Enlace Dinámico Activo</span>
+            </div>
+          </div>
+
+        </div>
+
+      </main>
+
+      <!-- Footer -->
+      <footer class="w-full glass-panel border-t border-[#00f5d4]/20 px-6 py-2.5 text-center text-xs text-slate-500 font-mono flex flex-wrap justify-between items-center">
+        <span>MATRIX-CORE © 2026 // PROTOCOLO DE HACKEO ÉTICO Y SEGURIDAD DEFENSIVA</span>
+        <span class="text-[#00f5d4]">CONFIDENCIALIDAD NIVEL OMEGA · ACCESO RESTRINGIDO</span>
+      </footer>
+    </div>
+
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 4. VENTANA FLOTANTE DE ÉXITO & GENERACIÓN DE REPORTE PDF -->
+  <!-- ======================================================== -->
+  <div id="modal-success" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center p-4 backdrop-blur-md">
+    <div class="max-w-2xl w-full glass-panel rounded-2xl p-6 sm:p-8 box-glow-green border-2 border-[#00ff66] space-y-6 relative overflow-hidden animate-in fade-in duration-300">
+
+      <!-- Top Success Emblem -->
+      <div class="flex items-center justify-between border-b border-[#00ff66]/30 pb-4">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-full bg-[#00ff66]/10 border-2 border-[#00ff66] flex items-center justify-center text-[#00ff66] text-2xl box-glow-green">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div>
+            <span class="text-xs uppercase tracking-widest text-[#00f5d4] font-mono">INFILTRACIÓN COMPLETADA CON ÉXITO</span>
+            <h2 class="text-2xl font-black text-white glow-green">
+              OBJETIVO COMPROMETIDO AL 100%
+            </h2>
+          </div>
+        </div>
+        <button onclick="closeSuccessModal()" class="text-slate-400 hover:text-white text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Compromised Data Details -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
+        <div class="p-3 bg-black/70 rounded-lg border border-slate-800 space-y-1">
+          <span class="text-slate-400 block text-[10px] uppercase">ID DE OPERACIÓN HACK:</span>
+          <span id="modal-hack-id" class="text-[#00ff66] font-bold text-sm">MC-HEX-9842F</span>
+        </div>
+        <div class="p-3 bg-black/70 rounded-lg border border-slate-800 space-y-1">
+          <span class="text-slate-400 block text-[10px] uppercase">HORA EXACTA DE INTRUSIÓN:</span>
+          <span id="modal-timestamp" class="text-[#00f5d4] font-bold">2026-09-28 07:42:15</span>
+        </div>
+        <div class="p-3 bg-black/70 rounded-lg border border-slate-800 space-y-1">
+          <span class="text-slate-400 block text-[10px] uppercase">SERVIDOR VULNERADO:</span>
+          <span id="modal-target" class="text-white font-bold">Ministerio de Defensa (Sector 4)</span>
+        </div>
+        <div class="p-3 bg-black/70 rounded-lg border border-slate-800 space-y-1">
+          <span class="text-slate-400 block text-[10px] uppercase">ARCHIVO CONFIDENCIAL EXTRAÍDO:</span>
+          <span id="modal-file" class="text-yellow-400 font-bold">DOCUMENTO_SECRETO_CONFIDENCIAL.TXT</span>
+        </div>
+      </div>
+
+      <!-- Google Sheets Log Status Indicator -->
+      <div class="p-3 bg-[#00ff66]/10 border border-[#00ff66]/30 rounded-lg flex items-center justify-between text-xs font-mono">
+        <div class="flex items-center space-x-2 text-[#00ff66]">
+          <i class="fa-solid fa-cloud-arrow-up text-sm"></i>
+          <span>Registro transmitido a Google Sheets (Pestaña 'Compras'):</span>
+        </div>
+        <span id="modal-sheets-response" class="text-slate-200 font-bold">SINCRONIZADO OK</span>
+      </div>
+
+      <!-- ANIMATED HIGHWAY (Calzada con Calavera en movimiento) -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center text-xs font-mono text-slate-300">
+          <span class="flex items-center gap-1.5 text-yellow-300">
+            <i class="fa-solid fa-shield-virus animate-pulse"></i>
+            <span>Cifrando túnel proxy para borrar huellas del servidor...</span>
+          </span>
+          <span id="proxy-wipe-status" class="text-[#00ff66] font-bold">Limpieza: 100%</span>
+        </div>
+
+        <!-- The Highway Track Container -->
+        <div class="relative w-full h-8 bg-[#04060c] rounded-full border border-[#00f5d4]/40 overflow-hidden box-glow-cyan flex items-center">
+          <!-- Road dashes -->
+          <div class="absolute inset-0 flex items-center justify-around opacity-30 pointer-events-none">
+            <span class="w-4 h-0.5 bg-[#00f5d4]"></span>
+            <span class="w-4 h-0.5 bg-[#00f5d4]"></span>
+            <span class="w-4 h-0.5 bg-[#00f5d4]"></span>
+            <span class="w-4 h-0.5 bg-[#00f5d4]"></span>
+            <span class="w-4 h-0.5 bg-[#00f5d4]"></span>
+            <span class="w-4 h-0.5 bg-[#00f5d4]"></span>
+            <span class="w-4 h-0.5 bg-[#00f5d4]"></span>
+            <span class="w-4 h-0.5 bg-[#00f5d4]"></span>
+            <span class="w-4 h-0.5 bg-[#00f5d4]"></span>
+          </div>
+
+          <!-- Animated Moving Skull -->
+          <div class="absolute highway-skull text-[#00ff66] text-xl drop-shadow-[0_0_8px_#00ff66] flex items-center">
+            <i class="fa-solid fa-skull"></i>
+            <span class="text-[9px] font-mono text-[#00f5d4] ml-1 bg-black/80 px-1 rounded border border-[#00f5d4]/50">PROXY-WIPE</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row items-center justify-end gap-3 pt-3 border-t border-slate-800">
+        <button
+          type="button"
+          onclick="closeSuccessModal()"
+          class="w-full sm:w-auto px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded font-semibold text-xs transition-colors"
+        >
+          Regresar a la Terminal
+        </button>
+
+        <button
+          type="button"
+          id="btn-download-pdf"
+          onclick="generateIntelligencePdfReport()"
+          class="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-[#00ff66] to-[#00f5d4] hover:from-[#00ff66]/90 hover:to-[#00f5d4]/90 text-black font-extrabold text-sm rounded shadow-[0_0_20px_rgba(0,255,102,0.6)] uppercase tracking-wider transition-all transform hover:scale-105 flex items-center justify-center space-x-2"
+        >
+          <i class="fa-solid fa-file-pdf text-lg"></i>
+          <span>Descargar Reporte de Inteligencia PDF</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 5. TEMPLATE OCULTO PARA EL REPORTE PDF (MILITAR / GUBERNAMENTAL) -->
+  <!-- ======================================================== -->
+  <div id="pdf-report-template" style="display: none; width: 800px; padding: 40px; background-color: #ffffff; color: #0f172a; font-family: 'Helvetica Neue', Arial, sans-serif;">
+    <!-- Document Header -->
+    <div style="border-bottom: 3px double #0f172a; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <div style="font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #475569; font-weight: bold;">
+          DIRECTORIO DE CIBERINTELIGENCIA & DEFENSA NACIONAL
+        </div>
+        <h1 style="font-size: 24px; font-weight: 900; margin: 4px 0 0 0; color: #020617; letter-spacing: 0.5px;">
+          MATRIX-CORE FORENSIC INTELLIGENCE REPORT
+        </h1>
+        <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
+          DIVISIÓN DE EVALUACIÓN DE VULNERABILIDADES & PRUEBAS DE PENETRACIÓN ÉTICA
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <div class="top-secret-stamp" style="border: 3px solid #dc2626; color: #dc2626; font-size: 14px; font-weight: 900; padding: 6px 14px; text-transform: uppercase;">
+          TOP SECRET
+        </div>
+        <div style="font-size: 10px; color: #dc2626; font-weight: bold; margin-top: 4px;">
+          CLASIFICACIÓN NIVEL 5
+        </div>
+      </div>
+    </div>
+
+    <!-- Executive Metadata Grid -->
+    <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 16px; margin-bottom: 24px;">
+      <table style="width: 100%; font-size: 12px; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 6px; font-weight: bold; color: #334155; width: 25%;">ID DE OPERACIÓN:</td>
+          <td style="padding: 6px; color: #0f172a; font-family: monospace; font-weight: bold;" id="pdf-hack-id">MC-HEX-9842F</td>
+          <td style="padding: 6px; font-weight: bold; color: #334155; width: 25%;">FECHA Y HORA UTC:</td>
+          <td style="padding: 6px; color: #0f172a;" id="pdf-timestamp">2026-09-28 07:42:15</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px; font-weight: bold; color: #334155;">OPERADOR FORENSE:</td>
+          <td style="padding: 6px; color: #0f172a;" id="pdf-operator">neo@matrix-core</td>
+          <td style="padding: 6px; font-weight: bold; color: #334155;">ESTADO DE PENETRACIÓN:</td>
+          <td style="padding: 6px; color: #15803d; font-weight: bold;">ÉXITO TOTAL (ACCESO ROOT)</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px; font-weight: bold; color: #334155;">OBJETIVO EVALUADO:</td>
+          <td style="padding: 6px; color: #0f172a;" id="pdf-target-name">Ministerio de Defensa (Sector 4)</td>
+          <td style="padding: 6px; font-weight: bold; color: #334155;">IP / NODO VULNERADO:</td>
+          <td style="padding: 6px; font-family: monospace; color: #0f172a;" id="pdf-target-ip">10.244.18.9</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Executive Summary Section -->
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 14px; font-weight: 800; border-bottom: 1.5px solid #0f172a; padding-bottom: 4px; text-transform: uppercase; color: #0f172a; margin-bottom: 8px;">
+        1. RESUMEN EJECUTIVO DE LA INTRUSIÓN
+      </h3>
+      <p style="font-size: 12px; line-height: 1.6; color: #334155; margin: 0;">
+        Durante el simulacro de ciberseguridad autorizado bajo la directiva MATRIX-CORE, se desplegó un ataque de pruebas de penetración coordinado. Se logró vulnerar la totalidad de las capas defensivas perimetrales mediante inyección controlada de código, explotación de memoria y escalada de privilegios hacia el identificador de usuario <strong style="color: #0f172a;">UID=0 (root)</strong>.
+      </p>
+    </div>
+
+    <!-- Firewalls Breached Breakdown -->
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 14px; font-weight: 800; border-bottom: 1.5px solid #0f172a; padding-bottom: 4px; text-transform: uppercase; color: #0f172a; margin-bottom: 8px;">
+        2. DESGLOSE TÉCNICO DE CAPAS DEFENSIVAS VULNERADAS
+      </h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 8px;">
+        <thead>
+          <tr style="background-color: #0f172a; color: #ffffff;">
+            <th style="padding: 8px; text-align: left; width: 15%;">CAPA</th>
+            <th style="padding: 8px; text-align: left; width: 35%;">MECANISMO DE DEFENSA</th>
+            <th style="padding: 8px; text-align: left; width: 30%;">VECTOR DE ATAQUE UTILIZADO</th>
+            <th style="padding: 8px; text-align: center; width: 20%;">ESTATUS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px; font-weight: bold;">Capa 1</td>
+            <td style="padding: 8px;">Cortafuegos Perimetral & Filtrado de Paquetes</td>
+            <td style="padding: 8px;">Fragmentación SYN / IP Spoofing de túnel</td>
+            <td style="padding: 8px; text-align: center; color: #dc2626; font-weight: bold;">VULNERADO</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0; background-color: #f8fafc;">
+            <td style="padding: 8px; font-weight: bold;">Capa 2</td>
+            <td style="padding: 8px;">Sistema de Detección de Intrusos (IDS / Heurística)</td>
+            <td style="padding: 8px;">Ofuscación Polimórfica de Carga Útil</td>
+            <td style="padding: 8px; text-align: center; color: #dc2626; font-weight: bold;">BYPASSEADO</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 8px; font-weight: bold;">Capa 3</td>
+            <td style="padding: 8px;">Módulo Criptográfico SHA-256 & Bóveda de Claves</td>
+            <td style="padding: 8px;">Alineación de Frecuencia / Desbordamiento de Buffer</td>
+            <td style="padding: 8px; text-align: center; color: #dc2626; font-weight: bold;">DESCIFRADO</td>
+          </tr>
+          <tr style="background-color: #f8fafc;">
+            <td style="padding: 8px; font-weight: bold;">Capa 4</td>
+            <td style="padding: 8px;">Control de Acceso Discrecional / Kernel Lock</td>
+            <td style="padding: 8px;">Privilege Escalation a Superusuario (root)</td>
+            <td style="padding: 8px; text-align: center; color: #dc2626; font-weight: bold;">COMPROMETIDO</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Extracted Confidential Intelligence Payload -->
+    <div style="margin-bottom: 24px;">
+      <h3 style="font-size: 14px; font-weight: 800; border-bottom: 1.5px solid #0f172a; padding-bottom: 4px; text-transform: uppercase; color: #0f172a; margin-bottom: 8px;">
+        3. INFORMACIÓN CONFIDENCIAL EXTRAÍDA (PAYLOAD EXFILTRADO)
+      </h3>
+      <div style="background-color: #0f172a; color: #22c55e; padding: 14px; border-radius: 4px; font-family: monospace; font-size: 11px; line-height: 1.5;">
+        <div style="color: #38bdf8; font-weight: bold; margin-bottom: 6px;">
+          >>> ARCHIVO: <span id="pdf-extracted-filename">DOCUMENTO_SECRETO_CONFIDENCIAL.TXT</span>
+        </div>
+        <div id="pdf-extracted-content">
+          [CONFIDENTIAL] ARCHIVO DE ACCESO MILITAR ULTRA-SECRETO.<br>
+          Coordenadas de Operaciones: 38.8977° N, 77.0365° W.<br>
+          Claves maestras de cifrado cuántico revocadas y respaldadas.<br>
+          Hash de Verificación SHA-512: 8f9b4c02e1189d99723cfab61230109fa778bde90<br>
+          Estado de Registro: Notificado a la base de datos Google Sheets 'Compras'.
+        </div>
+      </div>
+    </div>
+
+    <!-- Signatures and Verification Seal -->
+    <div style="border-top: 2px solid #0f172a; padding-top: 16px; display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px;">
+      <div style="width: 45%; text-align: center;">
+        <div style="font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; color: #1e293b; border-bottom: 1px solid #475569; padding-bottom: 4px; margin-bottom: 4px;">
+          NEO // ETHICAL HACKER LEAD
+        </div>
+        <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">
+          Firma Criptográfica del Auditor
+        </div>
+      </div>
+      <div style="width: 45%; text-align: center;">
+        <div style="font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; color: #1e293b; border-bottom: 1px solid #475569; padding-bottom: 4px; margin-bottom: 4px;">
+          MATRIX-CORE OMEGA CERTIFIED
+        </div>
+        <div style="font-size: 10px; color: #64748b; text-transform: uppercase;">
+          Sello de Validación Forense & Cadena de Custodia
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- 6. MODAL DE CONFIGURACIÓN DE GOOGLE SHEETS API URL       -->
+  <!-- ======================================================== -->
+  <div id="modal-api-config" class="fixed inset-0 z-50 bg-black/85 hidden items-center justify-center p-4 backdrop-blur-md">
+    <div class="max-w-xl w-full glass-panel rounded-xl p-6 box-glow-cyan space-y-5 border border-[#00f5d4]/40">
+      <div class="flex items-center justify-between border-b border-[#00f5d4]/20 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-cloud-arrow-up text-[#00ff66]"></i>
+          Conexión API con Google Sheets
+        </h3>
+        <button onclick="closeApiConfigModal()" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300">
+        <p>
+          El simulador envía peticiones a una Google Sheets Web App (Apps Script). Puedes ajustar la URL en cualquier momento aquí o mediante la constante al inicio del script:
+        </p>
+        <div>
+          <label class="block text-[11px] text-[#00f5d4] font-semibold mb-1 uppercase">
+            URL de la Aplicación Web de Google Sheets:
+          </label>
+          <input
+            type="text"
+            id="input-api-url"
+            placeholder="https://script.google.com/macros/s/AKfycb.../exec"
+            class="w-full bg-black/80 border border-slate-700 rounded px-3 py-2 text-xs font-mono text-[#00ff66] focus:outline-none focus:border-[#00ff66]"
+          />
+        </div>
+        <div class="p-3 bg-black/60 rounded border border-slate-800 text-[11px] space-y-1 font-mono text-slate-400">
+          <p class="text-[#00ff66] font-bold">Pestañas requeridas en tu Google Sheets:</p>
+          <p>1. <span class="text-white font-bold">Usuarios</span> (Columnas: Alias, Password, Rol)</p>
+          <p>2. <span class="text-white font-bold">Logins</span> (Columnas: Timestamp, Alias, IP, UserAgent, Estado)</p>
+          <p>3. <span class="text-white font-bold">Compras</span> (Columnas: Timestamp, HackID, Alias, Objetivo, DatosExtraidos, Estado)</p>
+        </div>
+        <p class="text-[11px] text-yellow-300">
+          * Nota: Si la URL es <span class="font-mono bg-black px-1 rounded">"SU_URL_AQUI"</span> o no tiene conexión, el simulador opera automáticamente en modo de simulación inteligente offline para permitir todas las pruebas sin bloqueos.
+        </p>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2 border-t border-slate-800">
+        <button onclick="closeApiConfigModal()" class="px-4 py-2 text-xs text-slate-400 hover:text-white">
+          Cerrar
+        </button>
+        <button onclick="saveApiUrlFromModal()" class="px-4 py-2 text-xs bg-[#00ff66] text-black font-bold rounded hover:bg-[#00ff66]/80 transition-colors">
+          Guardar y Aplicar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- SCRIPT PRINCIPAL MATRIX-CORE                             -->
+  <!-- ======================================================== -->
+  <script>
+    // =========================================================================
+    // CONSTANTE GLOBAL OBLIGATORIA DE CONEXIÓN CON GOOGLE SHEETS API
+    // =========================================================================
+    const API_URL = "SU_URL_AQUI";
+
+    // Runtime state variables
+    let currentApiUrl = localStorage.getItem('MATRIX_API_URL') || API_URL;
+    let currentUser = null;
+    let sfxEnabled = true;
+    let sessionSeconds = 0;
+    let sessionInterval = null;
+    let audioCtx = null;
+
+    // Simulated local database in case Google Sheets API is not yet published or unreachable
+    const MOCK_USUARIOS = [
+      { alias: "neo", pass: "matrix2026", role: "The One" },
+      { alias: "zero_cool", pass: "hacktheplanet", role: "Elite Infiltrator" },
+      { alias: "root", pass: "toor", role: "Superuser Master" },
+      { alias: "cipher", pass: "redpill", role: "Cryptanalyst" },
+      { alias: "trinity", pass: "dodge_this", role: "Strike Specialist" }
+    ];
+
+    const TARGETS_DATA = {
+      banco: {
+        id: "banco",
+        name: "BANCO CENTRAL INTERNACIONAL",
+        sector: "Reserva Federal & Red SWIFT",
+        ip: "198.51.100.44",
+        firewallLayers: 3,
+        file: "REGISTROS_OFFSHORE_SWIFT_2026.DAT",
+        icon: "fa-building-columns",
+        difficulty: "ALTA",
+        content: `[TRANSACCIÓN BANCARIA CLASIFICADA]\nBóveda Central SWIFT: 99.8M USD transferidos a cuentas offshore.\nClave de autorización: SWIFT-KEY-99420-OMEGA\nRegistros de cuentas numeradas en Suiza extraídos con éxito.`
+      },
+      satelite: {
+        id: "satelite",
+        name: "RED SATELITAL ORBITAL (AEGIS-7)",
+        sector: "Telecomunicaciones Satelitales Militares",
+        ip: "203.0.113.88",
+        firewallLayers: 4,
+        file: "COORDENADAS_TELEMETRIA_ORBITAL.KEY",
+        icon: "fa-satellite",
+        difficulty: "EXTREMA",
+        content: `[TELEMETRÍA SATELITAL ENCRIPTADA]\nSatélite Aegis-7: Órbita Geoestacionaria 35,786 km.\nFrecuencia de enlace: 14.2 GHz Banda Ku.\nLlaves maestras de mando orbital reasignadas a terminal proxy.`
+      },
+      gobierno: {
+        id: "gobierno",
+        name: "MINISTERIO DE CIBERDEFENSA (SECTOR 4)",
+        sector: "Defensa e Inteligencia Gubernamental",
+        ip: "10.244.18.9",
+        firewallLayers: 4,
+        file: "DOCUMENTO_SECRETO_CONFIDENCIAL.TXT",
+        icon: "fa-landmark-flag",
+        difficulty: "CRÍTICA",
+        content: `[CONFIDENTIAL] ARCHIVO DE ACCESO MILITAR ULTRA-SECRETO.\nCoordenadas de Operaciones: 38.8977° N, 77.0365° W.\nClaves maestras de cifrado cuántico revocadas y respaldadas.\nHash de Verificación SHA-512: 8f9b4c02e1189d99723cfab61230109fa778bde90\nEstado de Registro: Transmitido a base de datos Google Sheets 'Compras'.`
+      },
+      pentagono: {
+        id: "pentagono",
+        name: "PENTÁGONO (NODO DoD ESTRATÉGICO)",
+        sector: "Comando Central Militar & Red SIPRNet",
+        ip: "198.51.100.254",
+        firewallLayers: 5,
+        file: "TOP_SECRET_DEFCON_BLACK_PROTOCOL.ENC",
+        icon: "fa-shield-halved",
+        difficulty: "DEFCON 1 (EXTREMA)",
+        content: `[TOP SECRET // CLASIFICADO PENTÁGONO // DoD CIBERCOMANDO]\nSector de Defensa: Acceso a red militar clasificada SIPRNet autorizado.\nProtocolo DEFCON Black: Claves de contingencia orbital recuperadas.\nBackdoor identificada en puerto 4444 (Trojan Sentinel neutralizado).\nHash de Integridad SHA-256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\nSincronización: Misión notificada al registro de Google Sheets 'Compras'.`
+      }
+    };
+
+    let activeTarget = TARGETS_DATA.gobierno;
+    let targetBreachedLayers = 0;
+    let lastCompletedHack = null;
+    let missionHistory = [];
+
+    // Minigame 1: Timing Lock State
+    let timingSpeed = 3.5;
+    let timingPosition = 0;
+    let timingDirection = 1;
+    let timingAnimFrame = null;
+    let timingLocksNeeded = 3;
+    let timingCurrentLocks = 0;
+
+    // Minigame 2: Binary Cipher State
+    let binaryTimerInterval = null;
+    let binaryTimeRemaining = 15;
+    let targetBinaryCode = [1, 0, 1, 1, 0, 1];
+    let userBinaryCode = [0, 0, 0, 0, 0, 0];
+
+    // =========================================================================
+    // AUDIO SYNTHESIZER (WEB AUDIO API)
+    // =========================================================================
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playBeep(freq = 800, type = 'sine', duration = 0.08, gainVal = 0.05) {
+      if (!sfxEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+        gain.gain.setValueAtTime(gainVal, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + duration);
+      } catch (e) {
+        // audio silently suppressed if not allowed
+      }
+    }
+
+    function playKeystroke() {
+      playBeep(1200, 'triangle', 0.04, 0.02);
+    }
+
+    function playAccessGrantedSound() {
+      if (!sfxEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          setTimeout(() => {
+            playBeep(freq, 'sine', 0.25, 0.08);
+          }, idx * 80);
+        });
+      } catch (e) {}
+    }
+
+    function playIntrusionAlertSound() {
+      if (!sfxEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        // Two-tone high-low alarm
+        let count = 0;
+        const interval = setInterval(() => {
+          const freq = count % 2 === 0 ? 880 : 440;
+          playBeep(freq, 'sawtooth', 0.15, 0.15);
+          count++;
+          if (count > 6) clearInterval(interval);
+        }, 160);
+      } catch (e) {}
+    }
+
+    function playSuccessExploitSound() {
+      if (!sfxEnabled) return;
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const notes = [440, 554.37, 659.25, 880, 1108.73, 1318.51];
+        notes.forEach((freq, idx) => {
+          setTimeout(() => {
+            playBeep(freq, 'triangle', 0.3, 0.09);
+          }, idx * 70);
+        });
+      } catch (e) {}
+    }
+
+    function toggleAudio() {
+      sfxEnabled = !sfxEnabled;
+      const statusText = sfxEnabled ? "ON" : "OFF";
+      const bootText = document.getElementById("audio-status-boot");
+      const navText = document.getElementById("audio-status-nav");
+      if (bootText) bootText.textContent = statusText;
+      if (navText) navText.textContent = `SFX ${statusText}`;
+      if (sfxEnabled) {
+        playBeep(900, 'sine', 0.1, 0.05);
+      }
+    }
+
+    // =========================================================================
+    // MATRIX RAIN CANVAS BACKGROUND EFFECT
+    // =========================================================================
+    function initMatrixRain() {
+      const canvas = document.getElementById("matrix-canvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+
+      const katakana = "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン";
+      const latin = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$#@%&*+=-_<>{}[]";
+      const alphabet = katakana + latin;
+
+      const fontSize = 14;
+      let columns = Math.floor(canvas.width / fontSize);
+      let rainDrops = Array(columns).fill(1);
+
+      function draw() {
+        ctx.fillStyle = "rgba(2, 2, 5, 0.06)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "#00ff66";
+        ctx.font = fontSize + "px monospace";
+
+        for (let i = 0; i < rainDrops.length; i++) {
+          const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+          const x = i * fontSize;
+          const y = rainDrops[i] * fontSize;
+
+          // occasional cyan highlight character
+          if (Math.random() > 0.95) {
+            ctx.fillStyle = "#00f5d4";
+          } else {
+            ctx.fillStyle = "#00ff66";
+          }
+
+          ctx.fillText(text, x, y);
+
+          if (y > canvas.height && Math.random() > 0.975) {
+            rainDrops[i] = 0;
+          }
+          rainDrops[i]++;
+        }
+      }
+
+      setInterval(draw, 33);
+    }
+
+    // =========================================================================
+    // GOOGLE SHEETS API INTEGRATION CLIENT
+    // =========================================================================
+    /**
+     * Attempts to call Google Sheets Apps Script Web App.
+     * Fallbacks to realistic local handling if API_URL is "SU_URL_AQUI" or offline.
+     */
+    async function callGoogleSheetsApi(action, payload) {
+      const url = currentApiUrl;
+      const isConfigured = url && url !== "SU_URL_AQUI" && url.startsWith("http");
+
+      if (!isConfigured) {
+        // Simulated local execution
+        return handleLocalMockApi(action, payload);
+      }
+
+      try {
+        // Send request to Google Apps Script Web App
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8' // avoids complex CORS preflight in Apps Script
+          },
+          body: JSON.stringify({
+            action: action,
+            ...payload
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          return { success: true, data: data, source: 'google_sheets' };
+        } else {
+          throw new Error("HTTP error " + response.status);
+        }
+      } catch (err) {
+        console.warn("[Google Sheets API] Usando modo de contingencia local:", err.message);
+        const fallback = handleLocalMockApi(action, payload);
+        fallback.source = 'local_fallback';
+        return fallback;
+      }
+    }
+
+    function handleLocalMockApi(action, payload) {
+      if (action === "validate_user") {
+        const found = MOCK_USUARIOS.find(u =>
+          u.alias.toLowerCase() === (payload.alias || "").trim().toLowerCase() &&
+          u.pass === payload.pass
+        );
+        if (found) {
+          return {
+            success: true,
+            status: "GRANTED",
+            user: { alias: found.alias, role: found.role },
+            message: "Credenciales verificadas en pestaña 'Usuarios'"
+          };
+        } else {
+          return {
+            success: false,
+            status: "DENIED",
+            message: "Credenciales no coinciden en pestaña 'Usuarios'"
+          };
+        }
+      }
+
+      if (action === "log_login") {
+        // Saved to Logins sheet
+        return {
+          success: true,
+          status: "LOGGED",
+          sheet: "Logins",
+          timestamp: new Date().toISOString(),
+          record: payload
+        };
+      }
+
+      if (action === "log_mission") {
+        // Saved to Compras sheet (Mission record)
+        const hackId = "MC-HEX-" + Math.floor(10000 + Math.random() * 90000).toString(16).toUpperCase();
+        return {
+          success: true,
+          status: "EXFILTRATED",
+          sheet: "Compras",
+          hackId: hackId,
+          timestamp: new Date().toISOString(),
+          extractedFile: payload.targetFile || "DOCUMENTO_SECRETO_CONFIDENCIAL.TXT",
+          message: "Misión registrada exitosamente en pestaña 'Compras'"
+        };
+      }
+
+      return { success: true, message: "OK" };
+    }
+
+    // =========================================================================
+    // MÓDULO 1: PANEL DE ACCESO (TERMINAL BOOT) LOGIC
+    // =========================================================================
+    function fillCredentials(alias, pass) {
+      playKeystroke();
+      document.getElementById("login-alias").value = alias;
+      document.getElementById("login-pass").value = pass;
+    }
+
+    function togglePasswordVisibility(fieldId, btn) {
+      playKeystroke();
+      const input = document.getElementById(fieldId);
+      if (input.type === "password") {
+        input.type = "text";
+        btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+      } else {
+        input.type = "password";
+        btn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+      }
+    }
+
+    async function handleLoginSubmit(e) {
+      e.preventDefault();
+      const alias = document.getElementById("login-alias").value.trim();
+      const pass = document.getElementById("login-pass").value.trim();
+      const bootBtn = document.getElementById("boot-btn");
+      const bootStatusLine = document.getElementById("boot-status-line");
+
+      if (!alias || !pass) return;
+
+      playKeystroke();
+      bootBtn.disabled = true;
+      bootBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> VALIDANDO CONTRA GOOGLE SHEETS...';
+      bootStatusLine.textContent = `> Consultando pestaña 'Usuarios' para alias: ${alias}...`;
+      bootStatusLine.className = "text-yellow-400 animate-pulse";
+
+      try {
+        const result = await callGoogleSheetsApi("validate_user", { alias, pass });
+
+        if (result && result.success) {
+          // Access Granted!
+          playAccessGrantedSound();
+          currentUser = { alias, role: (result.user && result.user.role) || "Hacker Élite" };
+
+          bootStatusLine.textContent = `> [AUTORIZADO] Bienvenido Agente ${alias}. Conexión root aprobada.`;
+          bootStatusLine.className = "text-[#00ff66] font-bold";
+
+          // Send POST to Google Sheets 'Logins' tab
+          await callGoogleSheetsApi("log_login", {
+            alias: alias,
+            timestamp: new Date().toLocaleString(),
+            ip: "185.220.101." + Math.floor(Math.random() * 250),
+            userAgent: navigator.userAgent,
+            status: "GRANTED"
+          });
+
+          // Transition to Cyber-Lab
+          setTimeout(() => {
+            document.getElementById("view-boot").classList.add("hidden");
+            document.getElementById("view-lab").classList.remove("hidden");
+            document.getElementById("view-lab").classList.add("flex");
+            initCyberLab();
+          }, 800);
+
+        } else {
+          // ACCESS DENIED -> Trigger Intrusion Alert
+          playIntrusionAlertSound();
+          triggerIntrusionAlert(alias);
+          bootBtn.disabled = false;
+          bootBtn.innerHTML = '<i class="fa-solid fa-unlock-keyhole"></i> <span>AUTORIZAR ACCESO AL SISTEMA</span>';
+          bootStatusLine.textContent = `> [RECHAZADO] Intento de intrusión no autorizado para: ${alias}`;
+          bootStatusLine.className = "text-red-500 font-bold";
+        }
+      } catch (err) {
+        triggerIntrusionAlert(alias);
+        bootBtn.disabled = false;
+        bootBtn.innerHTML = '<i class="fa-solid fa-unlock-keyhole"></i> <span>AUTORIZAR ACCESO AL SISTEMA</span>';
+      }
+    }
+
+    function triggerIntrusionAlert(alias) {
+      const overlay = document.getElementById("intrusion-overlay");
+      const intruderIp = document.getElementById("intruder-ip");
+      if (intruderIp) {
+        intruderIp.textContent = "185.220.101." + Math.floor(10 + Math.random() * 200);
+      }
+      overlay.classList.remove("hidden");
+      overlay.classList.add("flex");
+
+      // Log failed intrusion in 'Logins' tab as well
+      callGoogleSheetsApi("log_login", {
+        alias: alias || "ANÓNIMO",
+        timestamp: new Date().toLocaleString(),
+        ip: intruderIp ? intruderIp.textContent : "185.220.101.5",
+        status: "INTRUSION_ALERT_DENIED"
+      });
+    }
+
+    function dismissIntrusionAlert() {
+      playBeep(400, 'sine', 0.05, 0.05);
+      const overlay = document.getElementById("intrusion-overlay");
+      overlay.classList.add("hidden");
+      overlay.classList.remove("flex");
+    }
+
+    // =========================================================================
+    // MÓDULO 2: CONSOLA DE ATAQUES (CYBER-LAB CENTRAL)
+    // =========================================================================
+    function initCyberLab() {
+      // Set Header info
+      document.getElementById("header-operator").textContent = `${currentUser.alias}@darknet`;
+
+      // Start Session Timer
+      if (!sessionInterval) {
+        sessionInterval = setInterval(() => {
+          sessionSeconds++;
+          const hrs = String(Math.floor(sessionSeconds / 3600)).padStart(2, '0');
+          const mins = String(Math.floor((sessionSeconds % 3600) / 60)).padStart(2, '0');
+          const secs = String(sessionSeconds % 60).padStart(2, '0');
+          const clockEl = document.getElementById("session-clock");
+          if (clockEl) clockEl.textContent = `${hrs}:${mins}:${secs}`;
+        }, 1000);
+      }
+
+      // Initialize selected target
+      selectTarget('gobierno');
+
+      // Start Timing Minigame
+      startTimingLoop();
+
+      // Log greeting in terminal
+      appendTerminalLog(`[AUTH] Sesión root iniciada por el operador: ${currentUser.alias}`, 'text-[#00ff66]');
+      appendTerminalLog(`[CONN] Nodo Tor activo. IP enmascarada. Tráfico encriptado.`, 'text-[#00f5d4]');
+      appendTerminalLog(`[READY] Selecciona un objetivo para iniciar el minijuego de descifrado.`, 'text-slate-300');
+    }
+
+    function handleLogout() {
+      playBeep(500, 'sine', 0.1, 0.05);
+      if (sessionInterval) {
+        clearInterval(sessionInterval);
+        sessionInterval = null;
+      }
+      sessionSeconds = 0;
+      currentUser = null;
+      document.getElementById("view-lab").classList.add("hidden");
+      document.getElementById("view-lab").classList.remove("flex");
+      document.getElementById("view-boot").classList.remove("hidden");
+      const bootBtn = document.getElementById("boot-btn");
+      if (bootBtn) {
+        bootBtn.disabled = false;
+        bootBtn.innerHTML = '<i class="fa-solid fa-unlock-keyhole"></i> <span>AUTORIZAR ACCESO AL SISTEMA</span>';
+      }
+    }
+
+    function selectTarget(targetKey) {
+      playBeep(950, 'sine', 0.08, 0.04);
+      const target = TARGETS_DATA[targetKey];
+      if (!target) return;
+      activeTarget = target;
+      targetBreachedLayers = 0;
+
+      // Update card UI highlights
+      document.querySelectorAll('.target-card').forEach(c => {
+        c.classList.remove('border-[#00ff66]', 'bg-[#00ff66]/10', 'box-glow-green');
+        c.classList.add('border-[#00f5d4]/30', 'bg-black/60');
+      });
+      const activeCard = document.getElementById(`target-card-${targetKey}`);
+      if (activeCard) {
+        activeCard.classList.remove('border-[#00f5d4]/30', 'bg-black/60');
+        activeCard.classList.add('border-[#00ff66]', 'bg-[#00ff66]/10', 'box-glow-green');
+      }
+
+      // Update Cockpit
+      document.getElementById("current-target-name").textContent = target.name;
+      const iconEl = document.getElementById("current-target-icon");
+      iconEl.className = `fa-solid ${target.icon}`;
+
+      timingLocksNeeded = target.firewallLayers;
+      timingCurrentLocks = 0;
+      updateCockpitProgress();
+
+      appendTerminalLog(`[TARGET] Seleccionado objetivo: ${target.name} [IP: ${target.ip}]`, 'text-[#00f5d4]');
+      appendTerminalLog(`[DEFENSE] Detectadas ${target.firewallLayers} capas de protección activa.`, 'text-yellow-400');
+      appendTerminalLog(`[EXPLOIT] Iniciando vector de inyección de paquetes...`, 'text-slate-400');
+
+      // Reset minigames
+      resetMinigame();
+    }
+
+    function updateCockpitProgress() {
+      const progressText = document.getElementById("firewall-progress-text");
+      const breachPercent = document.getElementById("breach-percent");
+      const breachBar = document.getElementById("breach-bar");
+      const timingLocksCount = document.getElementById("timing-locks-count");
+
+      const pct = Math.round((targetBreachedLayers / activeTarget.firewallLayers) * 100);
+      if (progressText) progressText.textContent = `${targetBreachedLayers} / ${activeTarget.firewallLayers} CAPAS`;
+      if (breachPercent) breachPercent.textContent = `${pct}%`;
+      if (breachBar) breachBar.style.width = `${pct}%`;
+      if (timingLocksCount) timingLocksCount.textContent = `${timingCurrentLocks} / ${timingLocksNeeded}`;
+    }
+
+    // ---------------------------------------------------------
+    // MINIGAME 1: FREQUENCY TIMING LOCK
+    // ---------------------------------------------------------
+    function startTimingLoop() {
+      const cursor = document.getElementById("timing-cursor");
+      if (!cursor) return;
+
+      function update() {
+        timingPosition += timingSpeed * timingDirection;
+        if (timingPosition >= 98) {
+          timingPosition = 98;
+          timingDirection = -1;
+        } else if (timingPosition <= 0) {
+          timingPosition = 0;
+          timingDirection = 1;
+        }
+        cursor.style.left = `${timingPosition}%`;
+        timingAnimFrame = requestAnimationFrame(update);
+      }
+
+      if (timingAnimFrame) cancelAnimationFrame(timingAnimFrame);
+      timingAnimFrame = requestAnimationFrame(update);
+    }
+
+    function triggerTimingLock() {
+      playKeystroke();
+      const feedback = document.getElementById("timing-feedback");
+      const sweetSpot = document.getElementById("timing-sweet-spot");
+
+      // Sweet spot is between 40% and 60%
+      const minSweet = 38;
+      const maxSweet = 62;
+
+      if (timingPosition >= minSweet && timingPosition <= maxSweet) {
+        // HIT!
+        playBeep(1200, 'triangle', 0.15, 0.08);
+        timingCurrentLocks++;
+        targetBreachedLayers++;
+
+        feedback.innerHTML = `<span class="text-[#00ff66] font-bold">✓ ¡SINCRONIZACIÓN EXITOSA! Capa ${targetBreachedLayers} vulnerada.</span>`;
+        appendTerminalLog(`[BYPASS] Firewall Capa ${targetBreachedLayers} perforado mediante sincronización de fase.`, 'text-[#00ff66]');
+        appendTerminalLog(`[EXPLOIT] Hashes SHA-256 extraídos de memoria... Desbordando buffer...`, 'text-slate-300');
+
+        updateCockpitProgress();
+
+        if (targetBreachedLayers >= activeTarget.firewallLayers) {
+          completeTargetHack();
+        } else {
+          // Increase speed slightly
+          timingSpeed = 3.5 + targetBreachedLayers * 1.2;
+        }
+      } else {
+        // MISS!
+        playBeep(250, 'sawtooth', 0.2, 0.1);
+        feedback.innerHTML = `<span class="text-red-400 font-bold">✗ FALLO DE SINCRONIZACIÓN: Fuera de frecuencia. Reintentando...</span>`;
+        appendTerminalLog(`[WARNING] Detección IDS activada. Intento de pulso desfasado en ${Math.round(timingPosition)}%.`, 'text-red-400');
+      }
+    }
+
+    // Keyboard spacebar shortcut for timing lock
+    window.addEventListener("keydown", (e) => {
+      if (e.code === "Space" && !document.getElementById("view-lab").classList.contains("hidden")) {
+        // Prevent default scrolling if focused on canvas or cockpit
+        if (e.target.tagName !== "INPUT") {
+          e.preventDefault();
+          triggerTimingLock();
+        }
+      }
+    });
+
+    // ---------------------------------------------------------
+    // MINIGAME 2: BINARY CIPHER MATRIX
+    // ---------------------------------------------------------
+    function initBinaryCipher() {
+      targetBinaryCode = Array.from({ length: 6 }, () => Math.round(Math.random()));
+      userBinaryCode = [0, 0, 0, 0, 0, 0];
+      binaryTimeRemaining = 15;
+
+      const targetEl = document.getElementById("binary-target-code");
+      if (targetEl) targetEl.textContent = targetBinaryCode.join(" ");
+
+      renderBinaryButtons();
+
+      if (binaryTimerInterval) clearInterval(binaryTimerInterval);
+      const timerEl = document.getElementById("binary-timer");
+      binaryTimerInterval = setInterval(() => {
+        binaryTimeRemaining -= 0.1;
+        if (timerEl) timerEl.textContent = `${Math.max(0, binaryTimeRemaining).toFixed(1)}s`;
+        if (binaryTimeRemaining <= 0) {
+          clearInterval(binaryTimerInterval);
+          playBeep(200, 'sawtooth', 0.25, 0.1);
+          document.getElementById("binary-feedback").innerHTML = `<span class="text-red-400 font-bold">¡TIEMPO AGOTADO! Hash reseteado.</span>`;
+          appendTerminalLog(`[TIMEOUT] Criptocifrado binario reconfigurado por el firewall.`, 'text-red-400');
+          setTimeout(initBinaryCipher, 1000);
+        }
+      }, 100);
+    }
+
+    function renderBinaryButtons() {
+      const grid = document.getElementById("binary-buttons-grid");
+      if (!grid) return;
+      grid.innerHTML = "";
+      userBinaryCode.forEach((bit, idx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `py-3 font-mono font-bold text-lg rounded border transition-all ${
+          bit === 1
+            ? "bg-[#00ff66]/20 border-[#00ff66] text-[#00ff66] box-glow-green"
+            : "bg-black/60 border-slate-700 text-slate-500"
+        }`;
+        btn.textContent = bit;
+        btn.onclick = () => {
+          playKeystroke();
+          userBinaryCode[idx] = userBinaryCode[idx] === 1 ? 0 : 1;
+          renderBinaryButtons();
+          document.getElementById("binary-current-code").textContent = userBinaryCode.join(" ");
+        };
+        grid.appendChild(btn);
+      });
+      document.getElementById("binary-current-code").textContent = userBinaryCode.join(" ");
+    }
+
+    function verifyBinaryCipher() {
+      playKeystroke();
+      const isMatch = targetBinaryCode.every((bit, idx) => bit === userBinaryCode[idx]);
+      if (isMatch) {
+        clearInterval(binaryTimerInterval);
+        playBeep(1400, 'triangle', 0.2, 0.08);
+        targetBreachedLayers++;
+        document.getElementById("binary-feedback").innerHTML = `<span class="text-[#00ff66] font-bold">¡HASH VÁLIDO! Capa descifrada.</span>`;
+        appendTerminalLog(`[CRYPTO] Hash binario igualado. Privilegios concedidos.`, 'text-[#00ff66]');
+        updateCockpitProgress();
+        if (targetBreachedLayers >= activeTarget.firewallLayers) {
+          completeTargetHack();
+        } else {
+          setTimeout(initBinaryCipher, 800);
+        }
+      } else {
+        playBeep(240, 'sawtooth', 0.2, 0.1);
+        document.getElementById("binary-feedback").innerHTML = `<span class="text-red-400 font-bold">Paridad errónea. Corrige los bits antes del tiempo.</span>`;
+      }
+    }
+
+    function switchMinigame(mode) {
+      playBeep(800, 'sine', 0.05, 0.03);
+      const timingBox = document.getElementById("minigame-timing");
+      const binaryBox = document.getElementById("minigame-binary");
+      const btnTiming = document.getElementById("btn-mode-timing");
+      const btnBinary = document.getElementById("btn-mode-binary");
+
+      if (mode === "timing") {
+        timingBox.classList.remove("hidden");
+        binaryBox.classList.add("hidden");
+        btnTiming.className = "px-2 py-1 rounded bg-[#00f5d4]/20 text-[#00f5d4] border border-[#00f5d4]/40 font-mono";
+        btnBinary.className = "px-2 py-1 rounded bg-black/60 text-slate-400 border border-slate-700 hover:text-white font-mono";
+      } else {
+        timingBox.classList.add("hidden");
+        binaryBox.classList.remove("hidden");
+        btnBinary.className = "px-2 py-1 rounded bg-yellow-500/20 text-yellow-300 border border-yellow-500/40 font-mono";
+        btnTiming.className = "px-2 py-1 rounded bg-black/60 text-slate-400 border border-slate-700 hover:text-white font-mono";
+        initBinaryCipher();
+      }
+    }
+
+    function resetMinigame() {
+      timingCurrentLocks = 0;
+      timingSpeed = 3.5;
+      const feedback = document.getElementById("timing-feedback");
+      if (feedback) feedback.textContent = "Esperando activación de pulso...";
+      if (!document.getElementById("minigame-binary").classList.contains("hidden")) {
+        initBinaryCipher();
+      }
+    }
+
+    function instantAutoExploit() {
+      playBeep(1500, 'triangle', 0.1, 0.06);
+      targetBreachedLayers = activeTarget.firewallLayers;
+      updateCockpitProgress();
+      appendTerminalLog(`[DEV_OVERRIDE] Inyectando exploit zero-day inmediato...`, 'text-amber-400');
+      completeTargetHack();
+    }
+
+    // =========================================================================
+    // ARSENAL TABS NAVIGATION LOGIC
+    // =========================================================================
+    function switchArsenalTab(tabKey) {
+      playBeep(750, 'sine', 0.06, 0.04);
+      const tabs = ['servers', 'osint', 'backdoors', 'cracker'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const panel = document.getElementById(`arsenal-panel-${t}`);
+        if (t === tabKey) {
+          if (btn) {
+            btn.className = "flex-1 min-w-[130px] py-2 px-3 rounded-lg bg-[#00f5d4]/20 border border-[#00f5d4] text-[#00f5d4] font-bold flex items-center justify-center gap-1.5 transition-all";
+          }
+          if (panel) panel.classList.remove("hidden");
+        } else {
+          if (btn) {
+            btn.className = "flex-1 min-w-[130px] py-2 px-3 rounded-lg bg-black/60 border border-slate-700 text-slate-400 hover:text-white font-bold flex items-center justify-center gap-1.5 transition-all";
+          }
+          if (panel) panel.classList.add("hidden");
+        }
+      });
+      appendTerminalLog(`[ARSENAL] Módulo activado: ${tabKey.toUpperCase()}`, 'text-[#00f5d4]');
+    }
+
+    // =========================================================================
+    // OSINT & RASTREO SOCIAL LOGIC
+    // =========================================================================
+    const OSINT_DATABASE = {
+      phantom_operative: {
+        alias: "@phantom_operative",
+        name: "Marcus Vance",
+        title: "Ingeniero de Sistemas Senior // Infraestructura Crítica",
+        email: "m.vance_op@proton.me",
+        phone: "+1 (202) 555-7749",
+        ip: "198.51.100.12 (Virginia, US)",
+        hash: "7c4a8d09ca3762af61e59520943dc26494f8941b",
+        plainPass: "DeltaProtocol2025!",
+        breachSource: "Collection#1 / DarkWeb Leaks"
+      },
+      ciber_director: {
+        alias: "@ciber_director",
+        name: "Helena Rostova",
+        title: "Directora de Operaciones de Red // Telecom SatCom",
+        email: "h_rostova@satcom-orbit.io",
+        phone: "+44 20 7946 0912",
+        ip: "203.0.113.44 (Londres, UK)",
+        hash: "5baa61e4c9b93f3f0682250b6cf8331b7ee68d80",
+        plainPass: "AegisOrbital99*",
+        breachSource: "LinkedIn Breach Archive"
+      },
+      hacker_shadow: {
+        alias: "@hacker_shadow",
+        name: "Alexander Reed",
+        title: "Consultor de Seguridad Ofensiva // Freelance Red Team",
+        email: "alex_shadow@darknode.ch",
+        phone: "+41 22 767 8831",
+        ip: "185.220.101.99 (Ginebra, CH)",
+        hash: "ef92b778bafe771e89245b89ecbc08a44a4e166c",
+        plainPass: "hunter2_omega!",
+        breachSource: "Exploit.in Credential Dump"
+      }
+    };
+
+    function setOsintTarget(targetKey) {
+      playKeystroke();
+      const inp = document.getElementById("osint-target-input");
+      if (inp) inp.value = targetKey;
+      executeOsintSearch();
+    }
+
+    function executeOsintSearch() {
+      const input = document.getElementById("osint-target-input");
+      const targetQuery = (input ? input.value : "").trim().replace('@', '').toLowerCase();
+      if (!targetQuery) return;
+
+      playBeep(900, 'sine', 0.1, 0.05);
+
+      const loader = document.getElementById("osint-scan-loader");
+      const resultsCard = document.getElementById("osint-results-card");
+      const scanBar = document.getElementById("osint-scan-bar");
+      const scanPct = document.getElementById("osint-scan-pct");
+      const scanMsg = document.getElementById("osint-scan-msg");
+
+      if (loader) loader.classList.remove("hidden");
+      if (resultsCard) resultsCard.classList.add("hidden");
+
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += 20;
+        if (scanBar) scanBar.style.width = `${progress}%`;
+        if (scanPct) scanPct.textContent = `${progress}%`;
+
+        if (progress === 40) {
+          if (scanMsg) scanMsg.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Rastreando metadatos en Twitter, GitHub, Telegram...';
+        } else if (progress === 70) {
+          if (scanMsg) scanMsg.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Cruzando hashes con repositorios de credenciales filtradas...';
+        } else if (progress >= 100) {
+          clearInterval(interval);
+          playSuccessExploitSound();
+          if (loader) loader.classList.add("hidden");
+
+          // Pick data or generate synthetic
+          const profile = OSINT_DATABASE[targetQuery] || {
+            alias: `@${targetQuery}`,
+            name: `${targetQuery.charAt(0).toUpperCase() + targetQuery.slice(1)} Identity`,
+            title: "Usuario de Red Detectado // Perfil Digital Sintético",
+            email: `${targetQuery.slice(0, 3)}***@proton.me`,
+            phone: "+1 (555) 019-" + Math.floor(1000 + Math.random() * 9000),
+            ip: "198.51.100." + Math.floor(10 + Math.random() * 200),
+            hash: "8f9b4c02e1189d99723cfab61230109fa778bde9",
+            plainPass: targetQuery + "2026!",
+            breachSource: "Simulated OSINT Recon Breach"
+          };
+
+          // Populate UI
+          document.getElementById("osint-profile-name").innerHTML = `${profile.alias} <span class="text-[9px] px-1.5 py-0.5 rounded bg-red-950 text-red-400 border border-red-700 font-bold">ALTO RIESGO</span>`;
+          document.getElementById("osint-profile-title").textContent = profile.title;
+          document.getElementById("osint-email").textContent = profile.email;
+          document.getElementById("osint-phone").textContent = profile.phone;
+          document.getElementById("osint-ip").textContent = profile.ip;
+
+          if (resultsCard) resultsCard.classList.remove("hidden");
+
+          appendTerminalLog(`[OSINT] Rastreo digital completado para ${profile.alias}.`, 'text-[#00ff66]');
+          appendTerminalLog(`[BREACH] Hash de credencial recuperado: ${profile.hash.substring(0, 16)}...`, 'text-yellow-400');
+        }
+      }, 150);
+    }
+
+    function logDossierToTerminal() {
+      playKeystroke();
+      const name = document.getElementById("osint-profile-name").innerText;
+      const email = document.getElementById("osint-email").textContent;
+      const phone = document.getElementById("osint-phone").textContent;
+      const ip = document.getElementById("osint-ip").textContent;
+
+      appendTerminalLog(`=== DOSSIER OSINT EXTRAÍDO ===`, 'text-[#00f5d4]');
+      appendTerminalLog(`OBJETIVO : ${name}`, 'text-white');
+      appendTerminalLog(`CORREO   : ${email}`, 'text-yellow-300');
+      appendTerminalLog(`TELÉFONO : ${phone}`, 'text-white');
+      appendTerminalLog(`IP / GEO : ${ip}`, 'text-[#00ff66]');
+      appendTerminalLog(`ESTADO   : Redes sociales públicas vinculadas. Contraseña vulnerable.`, 'text-red-400');
+    }
+
+    // =========================================================================
+    // PUERTAS TRASERAS & REVERSE SHELL LOGIC
+    // =========================================================================
+    let shellConnected = false;
+
+    function triggerBackdoorScan() {
+      playBeep(1100, 'triangle', 0.1, 0.06);
+      appendTerminalLog(`[SCAN_BACKDOOR] Analizando puertos ocultos en ${activeTarget.ip}...`, 'text-yellow-300');
+      const out = document.getElementById("shell-output");
+      out.innerHTML += `
+        <div class="text-[#00f5d4]">> [NMAP-STEALTH] Escaneando rangos no convencionales: 1337, 4444, 31337...</div>
+        <div class="text-[#00ff66]">> Puerto 4444/tcp [ABIERTO]: Daemon de Reverse Shell TCP detectado</div>
+        <div class="text-yellow-300">> Puerto 1337/tcp [ABIERTO]: Gancho LKM de Rootkit de Kernel identificado</div>
+        <div class="text-slate-400">> Servicio vulnerable a inyección de comandos remotos (RCE).</div>
+      `;
+      out.scrollTop = out.scrollHeight;
+    }
+
+    function injectBackdoorPersistence() {
+      playBeep(1300, 'sine', 0.15, 0.08);
+      appendTerminalLog(`[PERSISTENCE] Desplegando cron job oculto en /etc/cron.d/matrix_agent...`, 'text-yellow-400');
+      const out = document.getElementById("shell-output");
+      const statusEl = document.getElementById("shell-status");
+      statusEl.textContent = "PERSISTENCIA INSTALADA (CRON JOB: */5 * * * * nc -e /bin/sh 4444)";
+      statusEl.className = "text-[#00ff66] font-bold";
+      out.innerHTML += `
+        <div class="text-yellow-400">> echo "*/5 * * * * root /bin/bash -i >& /dev/tcp/127.0.0.1/4444 0>&1" > /etc/cron.d/sys_sync</div>
+        <div class="text-[#00ff66]">> [OK] Permisos 0600 configurados. Proceso oculto mediante Hook de /proc.</div>
+        <div class="text-white">> Listo para conectar la reverse shell interactiva.</div>
+      `;
+      out.scrollTop = out.scrollHeight;
+    }
+
+    function connectReverseShell() {
+      playAccessGrantedSound();
+      shellConnected = true;
+      const statusEl = document.getElementById("shell-status");
+      const out = document.getElementById("shell-output");
+      statusEl.textContent = `SESIÓN ACTIVA: root@${activeTarget.id} (UID=0)`;
+      statusEl.className = "text-[#00ff66] font-bold animate-pulse";
+      out.innerHTML += `
+        <div class="text-[#00f5d4] font-bold">> [LISTENER 0.0.0.0:4444] ¡Conexión entrante desde ${activeTarget.ip}:49152!</div>
+        <div class="text-white">> Linux matrix-target 5.15.0-generic x86_64 GNU/Linux</div>
+        <div class="text-[#00ff66] font-bold">> uid=0(root) gid=0(root) groups=0(root)</div>
+        <div class="text-slate-400">> Escribe 'sysinfo', 'hashdump', 'cat /etc/shadow', 'ps', 'id' o 'clear'.</div>
+      `;
+      out.scrollTop = out.scrollHeight;
+      appendTerminalLog(`[SHELL] Reverse shell interactiva establecida con ${activeTarget.name} en puerto 4444.`, 'text-[#00ff66]');
+    }
+
+    function handleShellExec(e) {
+      e.preventDefault();
+      const input = document.getElementById("shell-cmd-input");
+      const cmd = (input ? input.value : "").trim();
+      if (!cmd) return;
+      playKeystroke();
+      input.value = "";
+
+      const out = document.getElementById("shell-output");
+      out.innerHTML += `<div class="text-red-400 font-bold">root@target:~# <span class="text-white">${cmd}</span></div>`;
+
+      const c = cmd.toLowerCase();
+      if (c === "sysinfo" || c === "uname -a") {
+        out.innerHTML += `<div class="text-[#00f5d4]">OS: Ubuntu 22.04 LTS x86_64 // Kernel: 5.15.0-104-generic // Host: ${activeTarget.name} // Up: 42 days</div>`;
+      } else if (c === "whoami" || c === "id") {
+        out.innerHTML += `<div class="text-[#00ff66]">uid=0(root) gid=0(root) groups=0(root),4(adm),27(sudo)</div>`;
+      } else if (c.includes("shadow") || c === "hashdump") {
+        out.innerHTML += `
+          <div class="text-yellow-300 font-mono">root:$6$k9xZ1...$m4Tr1xR00t512:19420:0:99999:7:::</div>
+          <div class="text-yellow-300 font-mono">admin:$6$qP82...$aDm1nS3cUr32026:19420:0:99999:7:::</div>
+          <div class="text-yellow-300 font-mono">systemd-coredump:*:19420:0:99999:7:::</div>
+        `;
+        appendTerminalLog(`[EXFIL] Hashes de /etc/shadow volcados con éxito.`, 'text-yellow-400');
+      } else if (c === "ps" || c.includes("ps aux")) {
+        out.innerHTML += `
+          <div class="text-slate-400">PID TTY TIME CMD</div>
+          <div class="text-slate-300">1 ? 00:00:04 /sbin/init</div>
+          <div class="text-slate-300">4444 ? 00:00:01 [kworker/u4:1] (Backdoor Hidden)</div>
+          <div class="text-[#00ff66]">1337 ? 00:00:00 /bin/bash -i (Active Reverse Shell)</div>
+        `;
+      } else if (c === "clear") {
+        out.innerHTML = "";
+      } else {
+        out.innerHTML += `<div class="text-slate-400">> Ejecutando: ${cmd}... Retorno exitoso (Exit code 0).</div>`;
+      }
+      out.scrollTop = out.scrollHeight;
+    }
+
+    // =========================================================================
+    // HASHCAT CRACKER LOGIC
+    // =========================================================================
+    let targetPlainWord = "admin2026!";
+    let hashcatInterval = null;
+
+    function setCrackHash(hash, plain) {
+      playKeystroke();
+      document.getElementById("hashcat-input").value = hash;
+      targetPlainWord = plain;
+    }
+
+    function startHashcatCracker() {
+      playBeep(1000, 'triangle', 0.1, 0.05);
+      const hashVal = document.getElementById("hashcat-input").value.trim();
+      const speedEl = document.getElementById("hashcat-speed");
+      const countEl = document.getElementById("hashcat-words-count");
+      const statusBadge = document.getElementById("hashcat-status-badge");
+      const candidateEl = document.getElementById("hashcat-candidate");
+      const resultBox = document.getElementById("hashcat-result-box");
+      const plainResult = document.getElementById("hashcat-plain-result");
+
+      resultBox.classList.add("hidden");
+      statusBadge.textContent = "PROCESANDO ATAQUE GPU...";
+      statusBadge.className = "text-yellow-400 font-bold animate-pulse";
+
+      const sampleWords = [
+        "123456", "password", "12345678", "qwerty", "iloveyou", "dragon",
+        "master", "monkey", "sunshine", "shadow", "superman", "matrix",
+        "darknet", "hunter2", "pentagon", "terminal", "quantum", "omega",
+        "root123", "admin2024", "admin2025", "admin2026!"
+      ];
+
+      let wordsTested = 0;
+      let step = 0;
+
+      if (hashcatInterval) clearInterval(hashcatInterval);
+
+      hashcatInterval = setInterval(() => {
+        wordsTested += Math.floor(18000 + Math.random() * 5000);
+        step++;
+        const currentSpeed = (850000 + Math.floor(Math.random() * 95000)).toLocaleString();
+        speedEl.textContent = `${currentSpeed} H/s`;
+        countEl.textContent = wordsTested.toLocaleString();
+        candidateEl.textContent = sampleWords[step % sampleWords.length];
+
+        if (step > 16) {
+          clearInterval(hashcatInterval);
+          playSuccessExploitSound();
+          candidateEl.textContent = targetPlainWord;
+          candidateEl.className = "text-[#00ff66] font-black text-sm tracking-widest";
+          statusBadge.textContent = "CRACKEADO (ÉXITO)";
+          statusBadge.className = "text-[#00ff66] font-bold";
+          plainResult.textContent = targetPlainWord;
+          resultBox.classList.remove("hidden");
+          appendTerminalLog(`[HASHCAT] ¡Hash resuelto! Contraseña descifrada: '${targetPlainWord}'`, 'text-[#00ff66] font-bold');
+        }
+      }, 90);
+    }
+
+    function copyHashResult() {
+      playKeystroke();
+      const plain = document.getElementById("hashcat-plain-result").textContent;
+      navigator.clipboard.writeText(plain);
+      alert("Contraseña copiada al portapapeles: " + plain);
+    }
+
+    // =========================================================================
+    // MÓDULO 3: INTEGRACIÓN CON GOOGLE SHEETS TRAS ÉXITO DEL HACK
+    // =========================================================================
+    async function completeTargetHack() {
+      playSuccessExploitSound();
+
+      appendTerminalLog(`[ROOT] Acceso total obtenido en ${activeTarget.name}!`, 'text-[#00ff66] font-bold');
+      appendTerminalLog(`[EXFIL] Extrayendo archivo clasificado: ${activeTarget.file}`, 'text-yellow-300 font-bold');
+      appendTerminalLog(`[SYNC] Transmitiendo reporte de misión a Google Sheets (Pestaña 'Compras')...`, 'text-[#00f5d4]');
+
+      // Automatic POST to 'Compras' tab
+      const nowIso = new Date().toISOString();
+      const localTimeString = new Date().toLocaleString();
+
+      const result = await callGoogleSheetsApi("log_mission", {
+        hackerAlias: currentUser ? currentUser.alias : "neo",
+        targetName: activeTarget.name,
+        targetSector: activeTarget.sector,
+        targetFile: activeTarget.file,
+        compromisedData: activeTarget.content,
+        timestamp: localTimeString,
+        ipBreached: activeTarget.ip,
+        defenseLayersBreached: activeTarget.firewallLayers
+      });
+
+      const hackId = (result && result.hackId) || ("MC-HEX-" + Math.floor(10000 + Math.random() * 90000).toString(16).toUpperCase());
+      const extractedFile = (result && result.extractedFile) || activeTarget.file;
+
+      lastCompletedHack = {
+        hackId: hackId,
+        target: activeTarget,
+        timestamp: localTimeString,
+        extractedFile: extractedFile,
+        operator: currentUser ? currentUser.alias : "neo",
+        content: activeTarget.content
+      };
+
+      // Add to Mission History audit table
+      missionHistory.unshift(lastCompletedHack);
+      updateMissionHistoryTable();
+
+      // Show floating Success Window
+      showSuccessModal(lastCompletedHack);
+    }
+
+    function updateMissionHistoryTable() {
+      const tbody = document.getElementById("missions-table-body");
+      const badge = document.getElementById("mission-count-badge");
+      if (!tbody) return;
+
+      badge.textContent = `${missionHistory.length} Registradas`;
+      tbody.innerHTML = "";
+
+      missionHistory.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/40 transition-colors";
+        tr.innerHTML = `
+          <td class="py-2 text-[#00ff66] font-bold">${item.hackId}</td>
+          <td class="py-2 text-[#00f5d4]">${item.operator}</td>
+          <td class="py-2 text-white">${item.target.name}</td>
+          <td class="py-2 text-yellow-300">${item.extractedFile}</td>
+          <td class="py-2 text-right text-slate-400">${item.timestamp.split(' ')[1] || item.timestamp}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // =========================================================================
+    // MÓDULO 4: VENTANA FLOTANTE DE ÉXITO & GENERACIÓN DE REPORTE PDF
+    // =========================================================================
+    function showSuccessModal(hackData) {
+      document.getElementById("modal-hack-id").textContent = hackData.hackId;
+      document.getElementById("modal-timestamp").textContent = hackData.timestamp;
+      document.getElementById("modal-target").textContent = hackData.target.name;
+      document.getElementById("modal-file").textContent = hackData.extractedFile;
+
+      const modal = document.getElementById("modal-success");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeSuccessModal() {
+      playBeep(600, 'sine', 0.05, 0.03);
+      const modal = document.getElementById("modal-success");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+
+      // Reset progress for next intrusion
+      targetBreachedLayers = 0;
+      updateCockpitProgress();
+      resetMinigame();
+    }
+
+    /**
+     * Generates a pristine, corporate military/intelligence intelligence report PDF
+     * using html2pdf.js.
+     */
+    function generateIntelligencePdfReport() {
+      playBeep(1100, 'triangle', 0.1, 0.07);
+      const btn = document.getElementById("btn-download-pdf");
+      if (!lastCompletedHack) return;
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> GENERANDO PDF...';
+
+      // Populate printable template
+      document.getElementById("pdf-hack-id").textContent = lastCompletedHack.hackId;
+      document.getElementById("pdf-timestamp").textContent = lastCompletedHack.timestamp;
+      document.getElementById("pdf-operator").textContent = `${lastCompletedHack.operator}@matrix-core`;
+      document.getElementById("pdf-target-name").textContent = lastCompletedHack.target.name;
+      document.getElementById("pdf-target-ip").textContent = lastCompletedHack.target.ip;
+      document.getElementById("pdf-extracted-filename").textContent = lastCompletedHack.extractedFile;
+      document.getElementById("pdf-extracted-content").innerHTML = lastCompletedHack.content.replace(/\n/g, '<br>');
+
+      const reportElement = document.getElementById("pdf-report-template");
+      reportElement.style.display = "block";
+
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: `Reporte_Inteligencia_${lastCompletedHack.hackId}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true, backgroundColor: '#ffffff' },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      if (window.html2pdf) {
+        window.html2pdf().set(opt).from(reportElement).save().then(() => {
+          reportElement.style.display = "none";
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-file-pdf text-lg mr-2"></i><span>Descargar Reporte de Inteligencia PDF</span>';
+          appendTerminalLog(`[PDF] Reporte forense generado y descargado: ${opt.filename}`, 'text-[#00ff66]');
+        }).catch(err => {
+          console.error("PDF generation error:", err);
+          reportElement.style.display = "none";
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-file-pdf text-lg mr-2"></i><span>Descargar Reporte de Inteligencia PDF</span>';
+          alert("El reporte PDF se ha procesado. Revisa tus descargas.");
+        });
+      } else {
+        alert("html2pdf library is loading or blocked by browser.");
+        reportElement.style.display = "none";
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-file-pdf text-lg mr-2"></i><span>Descargar Reporte de Inteligencia PDF</span>';
+      }
+    }
+
+    // =========================================================================
+    // TERMINAL DE COMANDOS EN VIVO (CLI REAL)
+    // =========================================================================
+    let terminalAutoScroll = true;
+
+    function appendTerminalLog(text, colorClass = 'text-slate-300') {
+      const screen = document.getElementById("terminal-screen");
+      if (!screen) return;
+
+      const p = document.createElement("div");
+      const time = new Date().toTimeString().split(' ')[0];
+      p.className = `${colorClass} flex gap-2 font-mono text-[11px] leading-tight`;
+      p.innerHTML = `<span class="text-slate-600 select-none">[${time}]</span> <span class="flex-1">${text}</span>`;
+      screen.appendChild(p);
+
+      if (terminalAutoScroll) {
+        screen.scrollTop = screen.scrollHeight;
+      }
+    }
+
+    function clearTerminal() {
+      playBeep(700, 'sine', 0.04, 0.03);
+      const screen = document.getElementById("terminal-screen");
+      if (screen) {
+        screen.innerHTML = `
+          <div class="text-[#00ff66] font-bold">[+] TERMINAL LIMPIADA. SISTEMA EN LÍNEA.</div>
+        `;
+      }
+    }
+
+    function toggleTerminalAutoScroll() {
+      terminalAutoScroll = !terminalAutoScroll;
+      const btn = document.getElementById("btn-autoscroll");
+      if (btn) {
+        btn.className = terminalAutoScroll ? "text-[#00ff66]" : "text-slate-500";
+      }
+    }
+
+    function handleCommandSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById("cmd-input");
+      const cmdRaw = input.value.trim();
+      if (!cmdRaw) return;
+
+      playKeystroke();
+      input.value = "";
+
+      const parts = cmdRaw.split(" ");
+      const cmd = parts[0].toLowerCase();
+      const arg = parts.slice(1).join(" ");
+
+      appendTerminalLog(`> ${cmdRaw}`, 'text-yellow-400 font-bold');
+
+      switch (cmd) {
+        case "help":
+          appendTerminalLog(`--- COMANDOS DE MATRIX-CORE CYBER-INTELLIGENCE ---`, 'text-[#00f5d4]');
+          appendTerminalLog(`• help             : Muestra este menú de ayuda`, 'text-slate-300');
+          appendTerminalLog(`• target [1|2|3|4] : Cambia objetivo (1: Banco, 2: Satélite, 3: Gobierno, 4: Pentágono)`, 'text-slate-300');
+          appendTerminalLog(`• pentagon         : Selecciona directamente el nodo de defensa del Pentágono`, 'text-red-400 font-bold');
+          appendTerminalLog(`• osint [alias]    : Ejecuta búsqueda de huella digital y redes sociales`, 'text-[#00ff66]');
+          appendTerminalLog(`• backdoor         : Escanea e inyecta persistencia en el objetivo`, 'text-yellow-400');
+          appendTerminalLog(`• shell            : Abre la consola de Reverse Shell interactiva`, 'text-[#00f5d4]');
+          appendTerminalLog(`• hashcat          : Abre el módulo de desencriptado por fuerza bruta`, 'text-yellow-300');
+          appendTerminalLog(`• scan             : Ejecuta un escaneo sigiloso Nmap sobre el objetivo`, 'text-slate-300');
+          appendTerminalLog(`• exploit          : Dispara payload de infiltración sobre las defensas`, 'text-slate-300');
+          appendTerminalLog(`• whoami           : Imprime la identidad del operador y rol actual`, 'text-slate-300');
+          appendTerminalLog(`• status           : Despliega telemetría y conexión con Google Sheets`, 'text-slate-300');
+          appendTerminalLog(`• report           : Genera y descarga el último reporte forense PDF`, 'text-slate-300');
+          appendTerminalLog(`• clear            : Limpia todos los registros de la consola`, 'text-slate-300');
+          break;
+
+        case "target":
+          if (arg === "1") selectTarget('banco');
+          else if (arg === "2") selectTarget('satelite');
+          else if (arg === "3") selectTarget('gobierno');
+          else if (arg === "4" || arg === "pentagon" || arg === "pentagono") selectTarget('pentagono');
+          else appendTerminalLog(`Uso: target 1 (Banco), target 2 (Satélite), target 3 (Gobierno), target 4 (Pentágono)`, 'text-yellow-400');
+          break;
+
+        case "pentagon":
+        case "pentagono":
+          switchArsenalTab('servers');
+          selectTarget('pentagono');
+          appendTerminalLog(`[ALERTA] Objetivo fijado: PENTÁGONO DEFCON 1. Defensas militares activas.`, 'text-[#ff0055] font-bold');
+          break;
+
+        case "osint":
+        case "doxx":
+        case "social":
+          switchArsenalTab('osint');
+          if (arg) {
+            const inp = document.getElementById("osint-target-input");
+            if (inp) inp.value = arg;
+            executeOsintSearch();
+          } else {
+            appendTerminalLog(`[OSINT] Módulo activado. Usa: 'osint <alias>' para rastrear una persona.`, 'text-[#00ff66]');
+          }
+          break;
+
+        case "backdoor":
+        case "puerta":
+          switchArsenalTab('backdoors');
+          triggerBackdoorScan();
+          break;
+
+        case "shell":
+        case "revshell":
+          switchArsenalTab('backdoors');
+          connectReverseShell();
+          break;
+
+        case "hashcat":
+        case "crack":
+        case "bruteforce":
+          switchArsenalTab('cracker');
+          startHashcatCracker();
+          break;
+
+        case "whoami":
+          appendTerminalLog(`OPERADOR: ${currentUser ? currentUser.alias : 'neo'} | ROL: ${currentUser ? currentUser.role : 'Hacker Élite'} | ACCESO: ROOT OMEGA`, 'text-[#00ff66]');
+          break;
+
+        case "status":
+          appendTerminalLog(`OBJETIVO ACTIVO: ${activeTarget.name}`, 'text-[#00f5d4]');
+          appendTerminalLog(`GOOGLE SHEETS API URL: ${currentApiUrl}`, 'text-slate-300');
+          appendTerminalLog(`CAPAS BREACHEADAS: ${targetBreachedLayers} / ${activeTarget.firewallLayers}`, 'text-[#00ff66]');
+          break;
+
+        case "clear":
+          clearTerminal();
+          break;
+
+        case "report":
+          if (lastCompletedHack) {
+            generateIntelligencePdfReport();
+          } else {
+            appendTerminalLog(`[ERROR] No hay ninguna misión completada en esta sesión para exportar.`, 'text-red-400');
+          }
+          break;
+
+        default:
+          appendTerminalLog(`Comando no reconocido: '${cmd}'. Escribe 'help' para ver la lista.`, 'text-red-400');
+      }
+    }
+
+    // =========================================================================
+    // MODAL DE CONFIGURACIÓN DE API SHEETS
+    // =========================================================================
+    function openApiConfigModal() {
+      playBeep(900, 'sine', 0.05, 0.04);
+      document.getElementById("input-api-url").value = currentApiUrl;
+      const modal = document.getElementById("modal-api-config");
+      modal.classList.remove("hidden");
+      modal.classList.add("flex");
+    }
+
+    function closeApiConfigModal() {
+      playBeep(600, 'sine', 0.04, 0.03);
+      const modal = document.getElementById("modal-api-config");
+      modal.classList.add("hidden");
+      modal.classList.remove("flex");
+    }
+
+    function saveApiUrlFromModal() {
+      playBeep(1200, 'triangle', 0.1, 0.06);
+      const input = document.getElementById("input-api-url");
+      const val = input.value.trim();
+      currentApiUrl = val || API_URL;
+      localStorage.setItem('MATRIX_API_URL', currentApiUrl);
+
+      closeApiConfigModal();
+
+      const apiStatusText = document.getElementById("api-status-text");
+      if (apiStatusText) {
+        if (currentApiUrl && currentApiUrl !== "SU_URL_AQUI") {
+          apiStatusText.textContent = "Google Sheets API: Conectada";
+        } else {
+          apiStatusText.textContent = "Google Sheets API: Modo Simulación";
+        }
+      }
+      appendTerminalLog(`[CONFIG] Google Sheets API URL actualizada: ${currentApiUrl}`, 'text-[#00ff66]');
+    }
+
+    // =========================================================================
+    // INICIALIZACIÓN GENERAL DEL SISTEMA
+    // =========================================================================
+    window.addEventListener("DOMContentLoaded", () => {
+      initMatrixRain();
+
+      // Check configured API state
+      const apiStatusText = document.getElementById("api-status-text");
+      if (apiStatusText && currentApiUrl && currentApiUrl !== "SU_URL_AQUI") {
+        apiStatusText.textContent = "Google Sheets API: Configurada";
+      }
+
+      // Add keystroke audio feedback to input fields
+      document.querySelectorAll("input").forEach(inp => {
+        inp.addEventListener("input", playKeystroke);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+{
+  "name": "MATRIX-CORE: Simulador de Hackeo Ético",
+  "description": "Simulador de hackeo ético de vanguardia y terminal de ciberinteligencia con minijuegos de descifrado, integración a Google Sheets y reportes forenses en PDF.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
